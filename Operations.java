@@ -27,6 +27,9 @@ public class Operations {
                 case "enterPublication":
                     enterPublication();
                     break;
+                case "assignEditorToPublication":
+                    People.assignEditorToPublication();
+                    break;
                 case "exit":
                     running = false;
                     break;
@@ -71,15 +74,15 @@ public class Operations {
             statement.executeUpdate(
                     "CREATE TABLE Receives ( pID INTEGER NOT NULL, paymentID INTEGER NOT NULL, PRIMARY KEY (pID,paymentID), FOREIGN KEY (pID) REFERENCES Person (pID), FOREIGN KEY (paymentID) REFERENCES Payment (paymentID)); ");
             statement.executeUpdate(
+                    "CREATE TABLE Article ( pubID INTEGER NOT NULL, issueTitle VARCHAR(150) NOT NULL, articleTitle VARCHAR(150) NOT NULL, dateWritten DATE, text text, topic VARCHAR(30), PRIMARY KEY (pubID,issueTitle,articleTitle), FOREIGN KEY (pubID, issueTitle) REFERENCES Issue (pubID, issueTitle)); ");
+            statement.executeUpdate(
                     "CREATE TABLE WritesArticle ( pID INTEGER NOT NULL, pubID INTEGER NOT NULL, articleTitle VARCHAR(150) NOT NULL, issueTitle VARCHAR(150) NOT NULL, invited BOOLEAN NOT NULL, PRIMARY KEY (pID,pubID,articleTitle,issueTitle), FOREIGN KEY (pID) REFERENCES Person (pID), FOREIGN KEY (pubID, issueTitle, articleTitle) REFERENCES Article (pubID, issueTitle, articleTitle)); ");
+            statement.executeUpdate(
+                    "CREATE TABLE Chapter ( ISBN BIGINT NOT NULL, chapterTitle VARCHAR(150) NOT NULL, text text, date DATE, topic VARCHAR(30), PRIMARY KEY (ISBN,chapterTitle), FOREIGN KEY (ISBN) REFERENCES Edition (ISBN)); ");
             statement.executeUpdate(
                     "CREATE TABLE WritesChapter ( pID INTEGER NOT NULL, chapterTitle VARCHAR(150) NOT NULL, ISBN BIGINT NOT NULL, invited BOOLEAN NOT NULL, PRIMARY KEY (pID,chapterTitle,ISBN), FOREIGN KEY (pID) REFERENCES Person (pID), FOREIGN KEY (ISBN, chapterTitle) REFERENCES Chapter (ISBN, chapterTitle)); ");
             statement.executeUpdate(
                     "CREATE TABLE Edits ( pID INTEGER NOT NULL, pubID INTEGER NOT NULL, invited BOOLEAN NOT NULL, PRIMARY KEY (pID,pubID), FOREIGN KEY (pID) REFERENCES Person (pID), FOREIGN KEY (pubID) REFERENCES Publication (pubID)); ");
-            statement.executeUpdate(
-                    "CREATE TABLE Article ( pubID INTEGER NOT NULL, issueTitle VARCHAR(150) NOT NULL, articleTitle VARCHAR(150) NOT NULL, dateWritten DATE, text text, topic VARCHAR(30), PRIMARY KEY (pubID,issueTitle,articleTitle), FOREIGN KEY (pubID, issueTitle) REFERENCES Issue (pubID, issueTitle)); ");
-            statement.executeUpdate(
-                    "CREATE TABLE Chapter ( ISBN BIGINT NOT NULL, chapterTitle VARCHAR(150) NOT NULL, text text, date DATE, topic VARCHAR(30), PRIMARY KEY (ISBN,chapterTitle), FOREIGN KEY (ISBN) REFERENCES Edition (ISBN)); ");
             statement.executeUpdate(
                     "CREATE TABLE ContainsIssue ( oID INTEGER NOT NULL, pubID INTEGER NOT NULL, issueTitle VARCHAR(150) NOT NULL, PRIMARY KEY (oID,pubID,issueTitle), FOREIGN KEY (oID) REFERENCES `Order` (oID), FOREIGN KEY (pubID, issueTitle) REFERENCES Issue (pubID, issueTitle)); ");
         } catch (ClassNotFoundException e) {
@@ -100,6 +103,7 @@ public class Operations {
 
         try {
             // Drop tables so we have a fresh slate
+            statement.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
             statement.executeUpdate("DROP TABLE Distributor");
             statement.executeUpdate("DROP TABLE `Order`");
             statement.executeUpdate("DROP TABLE Publication");
@@ -117,6 +121,7 @@ public class Operations {
             statement.executeUpdate("DROP TABLE Article");
             statement.executeUpdate("DROP TABLE Chapter");
             statement.executeUpdate("DROP TABLE ContainsIssue");
+            statement.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
         } catch (SQLException e) {
         }
     }
