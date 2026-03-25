@@ -27,6 +27,9 @@ public class Operations {
                 case "enterPublication":
                     enterPublication();
                     break;
+                case "assignEditorToPublication":
+                    People.assignEditorToPublication();
+                    break;
                 case "exit":
                     running = false;
                     break;
