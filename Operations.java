@@ -15,20 +15,25 @@ public class Operations {
 
     public static void main(String[] args) {
         Scanner s = new Scanner(System.in);
-        System.out.println("Enter an operation: ");
-        String operation = s.nextLine();
 
         initialize();
 
-        switch (operation) {
-            case "enterPublication":
-                enterPublication();
-                break;
+        boolean running = true;
 
-            default:
-                break;
+        while (running) {
+            System.out.println("Enter an operation, or 'exit' to exit: ");
+            String operation = s.nextLine();
+            switch (operation) {
+                case "enterPublication":
+                    enterPublication();
+                    break;
+                case "exit":
+                    running = false;
+                    break;
+                default:
+                    break;
+            }
         }
-
 
         s.close();
         close();
@@ -42,7 +47,7 @@ public class Operations {
         try {
             connectToDatabase();
 
-            // Create all tables here
+            // Create all tables each time the program executes
             statement.executeUpdate(
                     "CREATE TABLE Distributor ( distribID INTEGER NOT NULL, balance float NOT NULL, contactName VARCHAR(30) NOT NULL, phoneNumber char(12), category VARCHAR(30), name VARCHAR(30), street VARCHAR(30) NOT NULL, city VARCHAR(30) NOT NULL, state CHAR(2) NOT NULL, PRIMARY KEY(distribID)); ");
             statement.executeUpdate(
@@ -95,6 +100,23 @@ public class Operations {
 
         try {
             // Drop tables so we have a fresh slate
+            statement.executeUpdate("DROP TABLE Distributor");
+            statement.executeUpdate("DROP TABLE `Order`");
+            statement.executeUpdate("DROP TABLE Publication");
+            statement.executeUpdate("DROP TABLE Issue");
+            statement.executeUpdate("DROP TABLE Edition");
+            statement.executeUpdate("DROP TABLE ISBNPublication");
+            statement.executeUpdate("DROP TABLE ContainsISBN");
+            statement.executeUpdate("DROP TABLE PlacedBy");
+            statement.executeUpdate("DROP TABLE Person");
+            statement.executeUpdate("DROP TABLE Payment");
+            statement.executeUpdate("DROP TABLE Receives");
+            statement.executeUpdate("DROP TABLE WritesArticle");
+            statement.executeUpdate("DROP TABLE WritesChapter");
+            statement.executeUpdate("DROP TABLE Edits");
+            statement.executeUpdate("DROP TABLE Article");
+            statement.executeUpdate("DROP TABLE Chapter");
+            statement.executeUpdate("DROP TABLE ContainsIssue");
         } catch (SQLException e) {
         }
     }
