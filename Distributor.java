@@ -1,5 +1,10 @@
 import java.sql.*;
+
+
 public class Distributor{
+    public static final String RED = "\033[31m";
+    public static final String GREEN = "\033[32m";
+    public static final String RESET = "\033[0m";
     private Connection connection;
 
     public Distributor(Connection connection){
@@ -52,8 +57,13 @@ public class Distributor{
         String sql = "DELETE FROM Distributor WHERE distribID = ?; ";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, distribID);
-        pstmt.executeUpdate();
+        int rows = pstmt.executeUpdate();
         pstmt.close();
+        if (rows == 0) {
+            System.out.println(RED + "No distributor found with ID " + distribID + RESET);
+        } else {
+            System.out.println(GREEN+ "Distributor deleted successfully."+ RESET);
+        }
     }
 
 
@@ -162,7 +172,11 @@ public class Distributor{
                 PreparedStatement pstmt = connection.prepareStatement(sql);
                 ResultSet rs = pstmt.executeQuery();
                 while (rs.next()) {
-                    System.out.println(rs.getInt("distribID") + " " + rs.getString("name") + " " + rs.getFloat("balance")+" "+rs.getFloat("CalculatedBalance"));
+                    System.out.println("distribID: " + rs.getInt("distribID") + 
+                        " | Name: " + rs.getString("name") +
+                        " | Balance: " + rs.getFloat("balance") +
+                        " | Calculated Balance: " + rs.getFloat("CalculatedBalance"));
+                    
                 }
                 rs.close();
                 pstmt.close();
@@ -176,7 +190,10 @@ public class Distributor{
         pstmt.setString(2, city);
         ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                System.out.println(rs.getInt("distribID") + " " + rs.getString("name"));
+                System.out.println("distribID: " + rs.getInt("distribID") + 
+                        " | Name: " + rs.getString("name") +
+                        " | Category: " + rs.getString("category") +
+                        " | City: " + rs.getString("city"));
             }
             rs.close();
     }
