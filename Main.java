@@ -2,8 +2,10 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
+    private static Distributor distributor = null;
     public static void main(String[] args) {
         Scanner s = new Scanner(System.in);
+        
 
         DBManager.initialize();
 
@@ -32,125 +34,49 @@ public class Main {
                 case "exit":
                     running = false;
                     break;
+                
+                case "enterPublication":
+                    enterPublication();
+                    break;
+                
                 case "addDistributor":{
-                    System.out.println("Enter Distributor ID: ");
-                    String distribID = s.nextLine();
-                    System.out.println("Enter balance: ");
-                    float balance = Float.parseFloat(s.nextLine());
-                    System.out.println("Enter contact name: ");
-                    String contactName = s.nextLine();
-                    System.out.println("Enter phone number: ");
-                    String phoneNumber = s.nextLine();
-                    System.out.println("Enter category: ");
-                    String category = s.nextLine();
-                    System.out.println("Enter name: ");
-                    String name = s.nextLine();
-                    System.out.println("Enter street: ");
-                    String street = s.nextLine();
-                    System.out.println("Enter city: ");
-                    String city = s.nextLine();
-                    System.out.println("Enter state: ");
-                    String state = s.nextLine();
-                    try {
-                        DBManager.distributor.addDistributor(distribID, balance, contactName, phoneNumber, category, name, street, city, state);
-                        System.out.println("Distributor added successfully.");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    DistributorUI.handleAddDistributor(s,distributor);
                     break;
                 }
 
                 case "updateDistributor":{
-                    System.out.println("Which field do you want to update? (contactName, category, city, ...): ");
-                    String field = s.nextLine();
-                    System.out.println("Enter new value: ");
-                    String value = s.nextLine();
-                    System.out.println("Enter distribID:");
-                    int distribID = Integer.parseInt(s.nextLine());
-                    try {
-                        DBManager.distributor.updateDistributor(field, value, distribID);
-                        System.out.println("Distributor updated successfully.");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    DistributorUI.handleUpdateDistributor(s, distributor);
                     break;
                 }
                 case "deleteDistributor":{
-                    System.out.println("Enter the ID of the distributor you want to delete: ");
-                    int distribID = Integer.parseInt(s.nextLine());
-                    
-                    try {
-                        DBManager.distributor.deleteDistributor(distribID);
-                        System.out.println("Distributor deleted successfully.");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    DistributorUI.handleDeleteDistributor(s, distributor);
                     break;
                 }
                 // Input order
                 case "inputOrder":{
-                    System.out.println("Is this order for bookEdition or Issue?: ");
-                    String distribID = s.nextLine();
-                    switch (distribID) {
-                        case "bookEdition":{
-                            System.out.println("Enter order ID: ");
-                            int oID = Integer.parseInt(s.nextLine());
-                            System.out.println("Enter order ISBN: ");
-                            long ISBN = Long.parseLong(s.nextLine());
-                            System.out.println("Due by (YYYY-MM-DD, or Enter to skip): ");
-                            String dueBy = s.nextLine();
-                            System.out.println("Shipping cost (or Enter to skip): ");
-                            String shippingInput = s.nextLine();
-                            Float shippingCost = shippingInput.isEmpty() ? null : Float.parseFloat(shippingInput);
-                            System.out.println("Date placed (YYYY-MM-DD): ");
-                            String datePlaced = s.nextLine();
-                            System.out.println("Delivery status: ");
-                            String deliveryStatus = s.nextLine();
-                            System.out.println("Payment status: ");
-                            String paymentStatus = s.nextLine();
-                            System.out.println("Copies: ");
-                            int copies = Integer.parseInt(s.nextLine());
-                            try {
-                                DBManager.distributor.inputOrderISBN(oID, ISBN, dueBy, shippingCost, datePlaced, deliveryStatus, paymentStatus, copies);
-                                System.out.println("Order added successfully.");
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        }
-                            case "issue":{
-                                System.out.println("Enter order ID: ");
-                                int oID = Integer.parseInt(s.nextLine());
-                                System.out.println("Enter order publication ID: ");
-                                int pubID = Integer.parseInt(s.nextLine());
-                                System.out.println("Enter issue Title: ");
-                                String issueTitle = s.nextLine();
-                                System.out.println("Due by (YYYY-MM-DD, or Enter to skip): ");
-                                String dueBy = s.nextLine();
-                                System.out.println("Shipping cost (or Enter to skip): ");
-                                String shippingInput = s.nextLine();
-                                Float shippingCost = shippingInput.isEmpty() ? null : Float.parseFloat(shippingInput);
-                                System.out.println("Date placed (YYYY-MM-DD): ");
-                                String datePlaced = s.nextLine();
-                                System.out.println("Delivery status: ");
-                                String deliveryStatus = s.nextLine();
-                                System.out.println("Payment status: ");
-                                String paymentStatus = s.nextLine();
-                                System.out.println("Copies: ");
-                                int copies = Integer.parseInt(s.nextLine());
-                                try {
-                                    DBManager.distributor.inputOrderIssue(oID, pubID, issueTitle, dueBy, shippingCost, datePlaced, deliveryStatus, paymentStatus, copies);
-                                    System.out.println("Order added successfully.");
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                                break;
-                            }
-
-                            default:
-                            break;
-                    }
-                    
+                    DistributorUI.handleInputOrder(s, distributor);
+                    break;
+                }
+                //Bill distributor for an order. 
+                case "billDistributor":{
+                    DistributorUI.handleBillDistributor(s, distributor);
+                    break;
+                }
+                //Receive a payment and change the outstanding balance of a distributor. 
+                case "receivePayment":{
+                    //thinking about this, maybe we need to first change the status of an order to payed or something
+                    DistributorUI.handleReceivePayment(s, distributor);
+                    break;
+                }
+                //Identify distributors whose total billed amount does not match the sum of their recorded payments. 
+                case "identifyMismatchedDistributors":{
+                    DistributorUI.handleIdentifyMismatchedDistributors(s, distributor);
+                    break;
+                }
+                //List all distributors of a specific type located in a given city. 
+                case "listDistributors":{
+                    DistributorUI.handleListDistributors(s, distributor);
+                    break;
                 }
                 default:
                     break;
