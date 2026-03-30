@@ -111,9 +111,75 @@ public class Distributor{
         pstmt2.close();
     }
     //Bill distributor for an order. 
-    //Receive a payment and change the outstanding balance of a distributor. 
+    public void billDistributor(int oID, int distribID, String paymentStatus) throws SQLException {
+        String sql = "INSERT INTO PlacedBy (distribID, oID) VALUES (?, ?);";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, distribID);
+        pstmt.setInt(2, oID);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        String sql2 = "UPDATE `Order` SET paymentStatus = ? WHERE oID = ?";
+        PreparedStatement pstmt2 = connection.prepareStatement(sql2);
+        pstmt2.setString(1, paymentStatus);
+        pstmt2.setInt(2, oID);
+        pstmt2.executeUpdate();
+        pstmt2.close();
+    }
+
+    //Receive a payment and change the outstanding balance of a distributor. }
+    public void receivePayment(int distribID, float newBalance) throws SQLException {
+        String sql = "UPDATE Distributor SET balance = ? WHERE distribID = ?";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setFloat(1, newBalance);
+        pstmt.setInt(2, distribID);
+        pstmt.executeUpdate();
+        pstmt.close();
+    }
     //Identify distributors whose total billed amount does not match the sum of their recorded payments. 
+    public void identifyMismatchedDistributors() throws SQLException {
+                String sql = "SELECT CombinedResults.distribID, " +
+                    "CombinedResults.name, " +
+                    "CombinedResults.balance, " +
+                    "SUM(SubBalance) as CalculatedBalance " +
+                    "FROM ( " +
+                    "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
+                    "SUM(`Order`.shippingCost + (`Order`.copies * Issue.price)) AS SubBalance " +
+                    "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
+                    "NATURAL JOIN ContainsIssue NATURAL JOIN Issue " +
+                    "WHERE `Order`.paymentStatus = 'Not Paid' " +
+                    "GROUP BY Distributor.distribID " +
+                    "UNION ALL " +
+                    "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
+                    "SUM(`Order`.shippingCost + (`Order`.copies * Edition.price)) AS SubBalance " +
+                    "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
+                    "NATURAL JOIN ContainsISBN NATURAL JOIN Edition " +
+                    "WHERE `Order`.paymentStatus = 'Not Paid' " +
+                    "GROUP BY Distributor.distribID " +
+                    ") AS CombinedResults " +
+                    "GROUP BY CombinedResults.distribID " +
+                    "HAVING ABS(balance - CalculatedBalance) >= 0.01";
+                PreparedStatement pstmt = connection.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    System.out.println(rs.getInt("distribID") + " " + rs.getString("name") + " " + rs.getFloat("balance")+" "+rs.getFloat("CalculatedBalance"));
+                }
+                rs.close();
+                pstmt.close();
+            }
+
     //List all distributors of a specific type located in a given city. 
+    public void listDistributors(String category, String city) throws SQLException {
+        String sql = "SELECT * FROM Distributor WHERE category = ? AND city = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setString(1, category);
+        pstmt.setString(2, city);
+        ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                System.out.println(rs.getInt("distribID") + " " + rs.getString("name"));
+            }
+            rs.close();
+    }
 
 
 }
