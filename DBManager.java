@@ -44,6 +44,16 @@ public class DBManager {
         return true;
     }
 
+    public static ResultSet executeQuery(String sql) {
+        try {
+            result = statement.executeQuery(sql);
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static boolean executeUpdate(String sql) {
         try {
             statement.executeUpdate(sql);

@@ -27,15 +27,18 @@ public class People {
         return true;
     }
 
-    public static void createPayment() {
+    public static boolean createPayment() {
         System.out.println("[createPayment]");
+        return false;
     }
 
-    public static void claimPayment() {
+    public static boolean claimPayment() {
         System.out.println("[claimPayment]");
+        return false;
     }
 
-    public static void listUnclaimedPayments() {
+    public static boolean listUnclaimedPayments() {
         System.out.println("[listUnclaimedPayments]");
+        return false;
     }
 }
