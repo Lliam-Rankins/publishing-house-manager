@@ -10,10 +10,13 @@ public class DBManager {
     public static Connection connection = null;
     public static Statement statement = null;
     public static ResultSet result = null;
+    // Adding distributor
+    public static Distributor distributor = null;
 
     public static void initialize() {
         try {
             connectToDatabase();
+            distributor = new Distributor(connection);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
