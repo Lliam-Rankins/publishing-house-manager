@@ -13,7 +13,7 @@ public class DBManager {
     // Adding distributor
     public static Distributor distributor = null;
 
-    public static void initialize() {
+    public static void initialize(Boolean resetTables) {
         try {
             connectToDatabase();
             distributor = new Distributor(connection);
@@ -23,8 +23,10 @@ public class DBManager {
             e.printStackTrace();
         }
 
-        // dropTables();
-        // createTables();
+        if (resetTables) {
+            dropTables();
+            createTables();
+        }
     }
 
     public static void connectToDatabase() throws SQLException, ClassNotFoundException {
