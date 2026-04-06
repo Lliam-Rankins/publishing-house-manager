@@ -75,9 +75,72 @@ public class Main {
                     DistributorUI.handleListDistributors(s, distributor);
                     break;
                 }
+                case "addPublication" : {
+                    PublicationUI.handleAddPublication(s);
+                    break;
+                }
+                case "updatePublication" : {
+                    PublicationUI.handleUpdatePublication(s);
+                    break;
+                }
+                case "removePublication" : {
+                    PublicationUI.handleRemovePublication(s);
+                    break;
+                }
+                case "addBookEdition" : {
+                    PublicationUI.handleAddBookEdition(s);
+                    break;
+                }
+                case "updateBookEdition" : {
+                    PublicationUI.handleUpdateBookEdition(s);
+                    break;
+                }
+                case "removeBookEdition" : {
+                    PublicationUI.handleRemoveBookEdition(s);
+                    break;
+                }
+                case "addIssue" : {
+                    PublicationUI.handleAddIssue(s);
+                    break;
+                }
+                case "editIssue" : {
+                    PublicationUI.handleEditIssue(s);
+                    break;
+                }
+                case "removeIssue" : {
+                    PublicationUI.handleRemoveIssue(s);
+                    break;
+                }
+                case "addChapter" : {
+                    PublicationUI.handleAddChapterTOC(s);
+                    break;               
+                }
+                case "editChapter" : {
+                    PublicationUI.handleEditChapter(s);
+                    break;               
+                }
+                case "removeChapter" : {
+                    PublicationUI.handleRemoveChapterTOC(s);
+                    break;               
+                }
+                case "addArticle" : {
+                    PublicationUI.handleAddArticleTOC(s);
+                    break;               
+                }
+                case "editArticle" : {
+                    PublicationUI.handleEditArticle(s);
+                    break;               
+                }
+                case "removeArticle" : {
+                    PublicationUI.handleRemoveArticleTOC(s);
+                    break;               
+                }
                 default:
+                    System.out.println("Invalid operation");
                     break;
             }
+
+
         }
 
         s.close();
