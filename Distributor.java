@@ -1,7 +1,4 @@
-
 import java.sql.*;
-
-
 public class Distributor{
     public static final String RED = "\033[31m";
     public static final String GREEN = "\033[32m";
@@ -10,11 +7,13 @@ public class Distributor{
 
     public Distributor(Connection connection){
         this.connection = connection;
+
         
     }
     // add a new distributor
     public boolean addDistributor(String distribID, float balance, String contactName, String phoneNumber, String category, String name, String street, String city, String state) throws SQLException {
-        String sql = "INSERT INTO Distributor VALUES(%s, %f, %s, %s, %s, %s, %s, %s) ";
+        String sql = "INSERT INTO Distributor VALUES('%s', %f, '%s', '%s', '%s', '%s', '%s', '%s', '%s') ";
+        sql = String.format(sql,distribID,balance,contactName,phoneNumber,category,name, street, city, state);
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't add this distributor");
             return false;
@@ -144,36 +143,38 @@ public class Distributor{
 
         String sql =
             "SELECT CombinedResults.distribID, CombinedResults.name, CombinedResults.balance, " +
-            "SUM(SubBalance) as CalculatedBalance " +
-            "FROM ( " +
-            "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
-            "SUM(`Order`.shippingCost + (`Order`.copies * Issue.price)) AS SubBalance " +
-            "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
-            "NATURAL JOIN ContainsIssue NATURAL JOIN Issue " +
-            "WHERE `Order`.paymentStatus = 'Not Paid' " +
-            "GROUP BY Distributor.distribID " +
-            "UNION ALL " +
-            "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
-            "SUM(`Order`.shippingCost + (`Order`.copies * Edition.price)) AS SubBalance " +
-            "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
-            "NATURAL JOIN ContainsISBN NATURAL JOIN Edition " +
-            "WHERE `Order`.paymentStatus = 'Not Paid' " +
-            "GROUP BY Distributor.distribID " +
-            ") AS CombinedResults " +
-            "GROUP BY CombinedResults.distribID " +
-            "HAVING ABS(balance - CalculatedBalance) >= 0.01";
+                    "SUM(SubBalance) as CalculatedBalance " +
+                    "FROM ( " +
+                    "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
+                    "SUM(`Order`.shippingCost + (`Order`.copies * Issue.price)) AS SubBalance " +
+                    "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
+                    "NATURAL JOIN ContainsIssue NATURAL JOIN Issue " +
+                    "WHERE `Order`.paymentStatus = 'Not Paid' " +
+                    "GROUP BY Distributor.distribID " +
+                    "UNION ALL " +
+                    "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
+                    "SUM(`Order`.shippingCost + (`Order`.copies * Edition.price)) AS SubBalance " +
+                    "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
+                    "NATURAL JOIN ContainsISBN NATURAL JOIN Edition " +
+                    "WHERE `Order`.paymentStatus = 'Not Paid' " +
+                    "GROUP BY Distributor.distribID " +
+                    ") AS CombinedResults " +
+                    "GROUP BY CombinedResults.distribID " +
+                    "HAVING ABS(balance - CalculatedBalance) >= 0.01";
 
         ResultSet rs = DBManager.executeQuery(sql);
 
-        while (rs.next()) {
-            System.out.println("distribID: " + rs.getInt("distribID") +
-                    " | Name: " + rs.getString("name") +
-                    " | Balance: " + rs.getFloat("balance") +
-                    " | Calculated Balance: " + rs.getFloat("CalculatedBalance"));
-        }
+                while (rs.next()) {
+                    System.out.println("distribID: " + rs.getInt("distribID") + 
+                        " | Name: " + rs.getString("name") +
+                        " | Balance: " + rs.getFloat("balance") +
+                        " | Calculated Balance: " + rs.getFloat("CalculatedBalance"));
+                    
+                }
 
-        rs.close();
-    }
+                rs.close();
+                //pstmt.close();
+            }
 
     //List all distributors of a specific type located in a given city. 
     public void listDistributors(String category, String city) throws SQLException {
@@ -183,13 +184,13 @@ public class Distributor{
             category, city
         );
         ResultSet rs = DBManager.executeQuery(sql);
-        while (rs.next()) {
-            System.out.println("distribID: " + rs.getInt("distribID") +
-                    " | Name: " + rs.getString("name") +
-                    " | Category: " + rs.getString("category") +
-                    " | City: " + rs.getString("city"));
-        }
-        rs.close();
+            while (rs.next()) {
+                System.out.println("distribID: " + rs.getInt("distribID") + 
+                        " | Name: " + rs.getString("name") +
+                        " | Category: " + rs.getString("category") +
+                        " | City: " + rs.getString("city"));
+            }
+            rs.close();
     }
 
 
