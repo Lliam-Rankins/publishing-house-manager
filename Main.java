@@ -35,14 +35,13 @@ public class Main {
                     peopleUI.handleListUnclaimedPayments();
                     break;
 
+                ///////////////////////////
+                // Distributor Operations
+                ///////////////////////////
                 case "addDistributor": {
                     DistributorUI.handleAddDistributor(s, distributor);
                     break;
                 }
-
-                ///////////////////////////
-                // Distributor Operations
-                ///////////////////////////
                 case "updateDistributor": {
                     DistributorUI.handleUpdateDistributor(s, distributor);
                     break;
@@ -136,6 +135,45 @@ public class Main {
                     Reports.totalExpenses();
                 }
                 
+                // Help Case
+                case "help": {
+                    // People Operations
+                    System.out.println("-----People Operations-----");
+                    System.out.println("assignEditorToPublication");
+                    System.out.println("removeEditorFromPublication");
+                    System.out.println("enterPayment");
+                    System.out.println("claimPayment");
+                    System.out.println("listUnclaimedPayments");
+                    System.out.println("");
+
+                    // Distributor Operations
+                    System.out.println("-----Distributor Operations-----");
+                    System.out.println("addDistributor");
+                    System.out.println("updateDistributor");
+                    System.out.println("deleteDistributor");
+                    System.out.println("inputOrder");
+                    System.out.println("billDistributor");
+                    System.out.println("receivePayment");
+                    System.out.println("identifyMismatchedDistributors");
+                    System.out.println("listDistributors");
+                    System.out.println("");
+
+                    // Report Operations
+                    System.out.println("-----Report Operations-----");
+                    System.out.println("countDistributors");
+                    System.out.println("countOrdersByDistributor");
+                    System.out.println("countIssuesByDistributor");
+                    System.out.println("costPerIssuePerDistributor");
+                    System.out.println("costPerEditionPerDistributor");
+                    System.out.println("countPublicationsPerDistributorPerWeek");
+                    System.out.println("countPublicationsPerDistributorPerMonth");
+                    System.out.println("totalCostPerDistributorPerWeek");
+                    System.out.println("totalCostPerDistributorPerMonth");
+                    System.out.println("totalRevenuePerCity");
+                    System.out.println("totalRevenuePerDistributor");
+                    System.out.println("totalExpenses");
+                    System.out.println("");
+                }
 
                 // Exit Case
                 case "exit":
