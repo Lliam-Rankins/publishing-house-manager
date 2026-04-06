@@ -16,6 +16,9 @@ public class Main {
             System.out.println("Enter an operation, or 'exit' to exit: ");
             String operation = s.nextLine();
             switch (operation) {
+                //////////////////////
+                // People Operations
+                //////////////////////
                 case "assignEditorToPublication":
                     peopleUI.handleAssignEditorToPublication();
                     break;
@@ -31,14 +34,15 @@ public class Main {
                 case "listUnclaimedPayments":
                     peopleUI.handleListUnclaimedPayments();
                     break;
-                case "exit":
-                    running = false;
-                    break;
+
                 case "addDistributor": {
                     DistributorUI.handleAddDistributor(s, distributor);
                     break;
                 }
 
+                ///////////////////////////
+                // Distributor Operations
+                ///////////////////////////
                 case "updateDistributor": {
                     DistributorUI.handleUpdateDistributor(s, distributor);
                     break;
@@ -135,6 +139,70 @@ public class Main {
                     PublicationUI.handleRemoveArticleTOC(s);
                     break;               
                 }
+
+                //////////////////////
+                // Report Operations
+                //////////////////////
+                // Count total number of distributors
+                case "countDistributors": {
+                    Reports.countDistributors();
+                }
+                // Count total orders by distributor
+                case "countOrdersByDistributor": {
+                    Reports.countOrdersByDistributor();
+                }
+                // Count total editions by distributor
+                case "countEditionsByDistributor": {
+                    Reports.countEditionsByDistributor();
+                }
+                // Count total issues by distributor
+                case "countIssuesByDistributor": {
+                    Reports.countIssuesByDistributor();
+                }
+                // Count total cost per issue per distributor
+                case "costPerIssuePerDistributor": {
+                    Reports.totalCostPerIssuesPerDistributor()
+                }
+                // Count total cost per edition per distributor
+                case "costPerEditionPerDistributor": {
+                    Reports.totalCostPerEditionPerDistributor();
+                }
+                // Count publications per distributor per week
+                case "countPublicationsPerDistributorPerWeek": {
+                    Reports.countPublicationsPerDistributorPerWeek();
+                }
+                // Count publications per distributor per month
+                case "countPublicationsPerDistributorPerMonth": {
+                    Reports.countPublicationsPerDistributorPerMonth();
+                }
+                // Total cost per distributor per week
+                case "totalCostPerDistributorPerWeek": {
+                    Reports.totalCostPerDistributorPerWeek();
+                }
+                // Total cost per distributor per month
+                case "totalCostPerDistributorPerMonth": {
+                    Reports.totalCostPerDistributorPerMonth();
+                }
+                // Total revenue per city
+                case "totalRevenuePerCity": {
+                    Reports.totalRevenuePerCity();
+                }
+                // Total revenue per distributor
+                case "totalRevenuePerDistributor": {
+                    Reports.totalRevenuePerCity();
+                }
+                // Calculate total expenses
+                case "totalExpenses": {
+                    Reports.totalExpenses();
+                }
+                
+
+                // Exit Case
+                case "exit":
+                    running = false;
+                    break;
+
+                // Invalid Operation
                 default:
                     System.out.println("Invalid operation");
                     break;

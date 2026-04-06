@@ -3,8 +3,6 @@ import java.sql.SQLException;
 
 public class People {
     public static boolean assignEditorToPublication(int editorId, int pubId, boolean invited) {
-        System.out.println("[assignEditorToPublication]");
-
         String query = "INSERT INTO Edits VALUES (%d, %d, %b)";
         query = String.format(query, editorId, pubId, invited);
 
@@ -17,8 +15,6 @@ public class People {
     }
 
     public static boolean removeEditorFromPublication(int editorId, int pubId) {
-        System.out.println("[removeEditorFromPublication]");
-
         String query = "DELETE FROM Edits WHERE pID = %d AND pubID = %d";
         query = String.format(query, editorId, pubId);
 
@@ -32,8 +28,6 @@ public class People {
 
     public static boolean enterPayment(int paymentId, float amount, String dateIssued,
             String workType, String dateClaimed, int personId) {
-        System.out.println("[enterPayment]");
-
         DBManager.beginTransaction();
 
         String query1 = "INSERT INTO Payment VALUES (%d, %f, '%s', '%s', '%s')";
@@ -56,8 +50,6 @@ public class People {
     }
 
     public static boolean claimPayment(int paymentId, String dateClaimed) {
-        System.out.println("[claimPayment]");
-
         DBManager.beginTransaction();
 
         String query = "UPDATE Payment SET dateClaimed = '%s' WHERE paymentID = %d";
@@ -74,8 +66,6 @@ public class People {
     }
 
     public static boolean listUnclaimedPayments(String startDate, String endDate) {
-        System.out.println("[listUnclaimedPayments]");
-
         String query =
                 "SELECT * FROM Payment WHERE dateClaimed IS NULL AND dateIssued BETWEEN '%s' AND '%s'";
         query = String.format(query, startDate, endDate);

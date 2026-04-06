@@ -1,0 +1,353 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class Reports {
+    // Class for Reports
+    //     Generate weekly and monthly reports: number and total price of copies of each publication bought per distributor, per week, and per month; total revenue of the publishing house; total expenses (i.e., shipping costs and salaries).
+    //     Calculate the total current number of distributors;
+    //     calculate total revenue (since inception) per city and per distributor.
+    //     Calculate total payments to the editors and authors, per time period (month) and per work type (book authorship, article authorship, or editorial work).
+    //     View all publications assigned to a specific editor. 
+
+
+    // Generate weekly and monthly reports: number and total price of copies
+    //  of each publication bought per distributor, per week, and per month; 
+    // total revenue of the publishing house; total expenses (i.e., shipping 
+    // costs and salaries).
+    // public static weeklyReport
+
+    // Count number of distributors
+    public static boolean countDistributors() {
+        // SQL Query
+        String query = "SELECT COUNT(*) FROM Distributor;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count distriubutors");
+            return false;
+        }
+
+        try {
+            System.out.println("Total Distributors: " + table.getInt(0));
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count distriubutors");
+            return false;
+        }
+    }
+
+    // Calculate how many orders were made by each distributor
+    public static boolean countOrdersByDistributor() {
+        // SQL Query
+        String query = "SELECT distribID, COUNT(*)  FROM PlacedBy GROUP BY distribID;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count orders per distriubutors");
+            return false;
+        }
+
+        try {
+            System.out.println("Total orders per distributor");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + ": " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count orders per distriubutors");
+            return false;
+        }
+    }
+
+    // Calculate number of copies of each edition required by each distributor
+    public static boolean countEditionsByDistributor() {
+        // SQL Query
+        String query = "SELECT SUM(copies), distribID, ISBN FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN GROUP BY distribID, ISBN;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count editions per distriubutors");
+            return false;
+        }
+
+        try {
+            System.out.println("Total editions per distributor");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + ", " + table.getString("ISBN") + " : " + table.getInt(0));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count editions per distriubutors");
+            return false;
+        }
+    }
+
+    // Calculate number of copies of each issue required by each distributo
+    public static boolean countIssuesByDistributor() {
+        // SQL Query
+        String query = "SELECT SUM(copies), distribID, issueTitle  FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue GROUP BY distribID, issueTitle;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count issues per distriubutors");
+            return false;
+        }
+
+        try {
+            System.out.println("Total issues per distributor");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + ", " + table.getString("issueTitle") + ": " + table.getInt(0));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count issues per distriubutors");
+            return false;
+        }
+    }
+
+    // Calculate the total amount of money per distributor and per issue
+    public static boolean totalCostPerIssuesPerDistributor() {
+        // SQL Query
+        String query = "SELECT SUM(price * copies), distribID, issueTitle FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, issueTitle;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count cost per issue per distriubutors");
+            return false;
+        }
+
+        try {
+            System.out.println("Total cost per issue per distributor");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + ", " + table.getString("issueTitle") + " | Cost: " + table.getInt(0));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count cost per issue per distriubutors");
+            return false;
+        }
+    }
+
+    // Calculate the total amount of money per distributor and per issue
+    public static boolean totalCostPerEditionPerDistributor() {
+        // SQL Query
+        String query = "SELECT SUM(price * copies), distribID, editionTitle FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, editionTitle;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count cost per edition per distriubutors");
+            return false;
+        }
+
+        try {
+            System.out.println("Total cost per edition per distributor");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + ", " + table.getString("editionTitle") + " | Cost: " + table.getInt(0));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count cost per edition per distriubutors");
+            return false;
+        }
+    }
+
+    // Calculate the number of copies of publications per distributor per week
+    public static boolean countPublicationsPerDistributorPerWeek() {
+        // SQL Query
+        String query = "SELECT DISTINCT distribID, WEEK(datePlaced) AS week ,SUM(copies) AS totalCopies, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week , SUM(copies) AS totalCopies, 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced) ORDER BY distribID, week;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count publications per distributor per week");
+            return false;
+        }
+
+        try {
+            System.out.println("Total publications per distributor per week");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + " : " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count publications per distributor per week");
+            return false;
+        }
+
+    }
+
+    // Calculate the number of copies of publications per distributor per month
+    public static boolean countPublicationsPerDistributorPerMonth() {
+        // SQL Query
+        String query = "SELECT DISTINCT distribID, MONTH(datePlaced) AS month ,SUM(copies) AS totalCopies, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, MONTH(datePlaced) UNION ALL SELECT distribID, MONTH(datePlaced) AS month , SUM(copies) AS totalCopies , 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, MONTH(datePlaced) ORDER BY distribID, month;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count publications per distributor per month");
+            return false;
+        }
+
+        try {
+            System.out.println("Total publications per distributor per month");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + " : " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count publications per distributor per month");
+            return false;
+        }
+    }
+
+    // Calculate total cost per distributor per week
+    public static boolean totalCostPerDistributorPerWeek() {
+        // SQL Query
+        String query = "SELECT DISTINCT distribID, WEEK(datePlaced) AS week ,SUM(price*copies) AS totalPrice, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week , SUM(price*copies) AS totalPrice, 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced) ORDER BY distribID, week;";
+        
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total cost per distributor per week");
+            return false;
+        }
+
+        try {
+            System.out.println("Total cost per distributor per week");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + " : " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count total cost per distributor per week");
+            return false;
+        }
+    }
+
+    // Calculate total cost per distributor per month
+    public static boolean totalCostPerDistributorPerMonth() {
+        // SQL Query
+        String query = "SELECT DISTINCT distribID, MONTH(datePlaced) AS month ,SUM(price*copies) AS totalPrice, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, MONTH(datePlaced) UNION ALL SELECT distribID, MONTH(datePlaced) AS month , SUM(price*copies) AS totalPrice , 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, MONTH(datePlaced) ORDER BY distribID, month;";
+        
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total cost per distributor per month");
+            return false;
+        }
+
+        try {
+            System.out.println("Total cost per distributor per month");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + " : " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count total cost per distributor per month");
+            return false;
+        }
+    }
+
+    // Calculate total revenue per city
+    public static boolean totalRevenuePerCity() {
+        // SQL Query
+        String query = "SELECT city, SUM(revenue) AS totalRevenue FROM (SELECT city, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY city UNION ALL SELECT city, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY city) AS CombinedResults GROUP BY city;";
+        
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total revenue per city");
+            return false;
+        }
+
+        try {
+            System.out.println("Total revenue per city");
+            while (table.next()) {
+                System.out.println(table.getString("city") + " : " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count total revenue per city");
+            return false;
+        }
+    }
+
+    // Calculate total revenue per distributor
+    public static boolean totalRevenuePerDistributor() {
+        // SQL Query
+        String query = "SELECT distribID, SUM(revenue) AS totalRevenue FROM (SELECT Distributor.distribID, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY Distributor.distribID UNION ALL SELECT Distributor.distribID, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY Distributor.distribID) AS CombinedResults GROUP BY distribID;";
+        
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total revenue per distributor");
+            return false;
+        }
+
+        try {
+            System.out.println("Total revenue per distributor");
+            while (table.next()) {
+                System.out.println(table.getString("distribID") + " : " + table.getInt(1));
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count total revenue per distributor");
+            return false;
+        }
+    }
+
+    // Calculate total expenses (Shipping Cost)
+    public static boolean totalExpenses() {
+        // SQL Query
+        String query = "SELECT SUM(shippingCost) FROM `Order`;";
+        
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total expenses"); 
+            return false;
+        }
+
+        try {
+            System.out.println("Total Expenses: " + table.getInt(0));
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't count total expenses"); 
+            return false;
+        }
+    }
+}
