@@ -16,7 +16,7 @@ public class PublicationUI {
 
   }
 
-  public static void updatePublication(Scanner s){
+  public static void handleUpdatePublication(Scanner s){
 
   int pubID; String title; String type; String pubPeriodicity;
   System.out.println("Enter Publication ID: ");
@@ -30,7 +30,7 @@ public class PublicationUI {
   Publication.updatePublication(pubID, title, type, pubPeriodicity);
 }
 
-  public static void removePublication(Scanner s){
+  public static void handleRemovePublication(Scanner s){
     int pubID;
     System.out.println("Enter Publication ID: ");
     pubID = s.nextInt();
@@ -38,7 +38,7 @@ public class PublicationUI {
   }
 
 
-  public static void addBookEdition(Scanner s){
+  public static void handleAddBookEdition(Scanner s){
     int pubID;
     long ISBN; 
     String edition; 
@@ -63,7 +63,7 @@ public class PublicationUI {
     Publication.addBookEdition(pubID, ISBN, edition, editionTitle, dateWritten, datePublished, price);    
   }
 
-  public static void updateBookEdition(Scanner s){
+  public static void handleUpdateBookEdition(Scanner s){
     long ISBN; String edition; String editionTitle; java.sql.Date dateWritten; java.sql.Date datePublished; double price;
     System.out.println("Enter ISBN: ");
     ISBN = s.nextLong();      
@@ -80,14 +80,14 @@ public class PublicationUI {
     Publication.updateBookEdition(ISBN, edition, editionTitle, dateWritten, datePublished, price);
   }
 
-  public static void removeBookEdition(Scanner s){
+  public static void handleRemoveBookEdition(Scanner s){
     long ISBN;
     System.out.println("Enter ISBN: ");
     ISBN = s.nextLong();
     Publication.removeBookEdition(ISBN);
   }
 
-  public static void addIssue(Scanner s){
+  public static void handleAddIssue(Scanner s){
     int pubID; String issueTitle; java.sql.Date pubDate; double price;
     System.out.println("Enter publication ID: ");
     pubID = s.nextInt();
@@ -100,7 +100,7 @@ public class PublicationUI {
     Publication.addIssue(pubID, issueTitle, pubDate, price);
   }
 
-  public static void editIssue(Scanner s){
+  public static void handleEditIssue(Scanner s){
     int pubID; String issueTitle; java.sql.Date pubDate; double price;
     System.out.println("Enter publication ID: ");
     pubID = s.nextInt();
@@ -114,7 +114,7 @@ public class PublicationUI {
     
   }
 
-  public static void removeIssue(Scanner s){
+  public static void handleRemoveIssue(Scanner s){
     int pubID;String issueTitle;
     System.out.println("Enter publication ID: ");
     pubID = s.nextInt();
@@ -126,7 +126,7 @@ public class PublicationUI {
 
 
 
-  public static void addChapterTOC(Scanner s){
+  public static void handleAddChapterTOC(Scanner s){
     long ISBN; String chapterTitle;
     System.out.println("Enter ISBN: ");
     ISBN = s.nextLong();
@@ -136,7 +136,7 @@ public class PublicationUI {
     
   }
 
-  public static void editChapter(Scanner s){
+  public static void handleEditChapter(Scanner s){
     int pubID; long ISBN; String chapterTitle; java.sql.Date date; String text; String topic;
       System.out.println("Enter publication ID: ");
       pubID = s.nextInt();
@@ -154,7 +154,7 @@ public class PublicationUI {
     
   }
 
-  public static void removeChapterTOC(Scanner s){
+  public static void handleRemoveChapterTOC(Scanner s){
     long ISBN; String chapterTitle;
     System.out.println("Enter ISBN: ");
     ISBN = s.nextLong();
@@ -164,7 +164,7 @@ public class PublicationUI {
     
   }
 
-  public static void addArticleTOC(Scanner s){
+  public static void handleAddArticleTOC(Scanner s){
     int pubID; String issueTitle; String articleTitle;
     System.out.println("Enter publication ID: ");
     pubID = s.nextInt();
@@ -176,7 +176,7 @@ public class PublicationUI {
     
   }
 
-  public static void editArticle(Scanner s){
+  public static void handleEditArticle(Scanner s){
     int pubID; String issueTitle; String articleTitle; java.sql.Date dateWritten; String text; String topic;
     System.out.println("Enter publication ID: ");
     pubID = s.nextInt();
@@ -194,7 +194,7 @@ public class PublicationUI {
     
   }
 
-  public static void removeArticleTOC(Scanner s){
+  public static void handleRemoveArticleTOC(Scanner s){
     long pubID; String issueTitle; String articleTitle;
     System.out.println("Enter publication ID: ");
     pubID = s.nextInt();

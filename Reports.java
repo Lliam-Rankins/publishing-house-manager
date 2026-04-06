@@ -27,6 +27,11 @@ public class Reports {
 
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count distriubutors");
+            return false;
+        }
+
         try {
             System.out.println("Total Distributors: " + table.getInt(0));
             return true;
@@ -43,6 +48,11 @@ public class Reports {
         String query = "SELECT distribID, COUNT(*)  FROM PlacedBy GROUP BY distribID;";
 
         ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count orders per distriubutors");
+            return false;
+        }
 
         try {
             System.out.println("Total orders per distributor");
@@ -65,6 +75,11 @@ public class Reports {
 
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count editions per distriubutors");
+            return false;
+        }
+
         try {
             System.out.println("Total editions per distributor");
             while (table.next()) {
@@ -85,6 +100,11 @@ public class Reports {
         String query = "SELECT SUM(copies), distribID, issueTitle  FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue GROUP BY distribID, issueTitle;";
 
         ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count issues per distriubutors");
+            return false;
+        }
 
         try {
             System.out.println("Total issues per distributor");
@@ -107,6 +127,11 @@ public class Reports {
 
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count cost per issue per distriubutors");
+            return false;
+        }
+
         try {
             System.out.println("Total cost per issue per distributor");
             while (table.next()) {
@@ -128,6 +153,11 @@ public class Reports {
 
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count cost per edition per distriubutors");
+            return false;
+        }
+
         try {
             System.out.println("Total cost per edition per distributor");
             while (table.next()) {
@@ -148,6 +178,11 @@ public class Reports {
         String query = "SELECT DISTINCT distribID, WEEK(datePlaced) AS week ,SUM(copies) AS totalCopies, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week , SUM(copies) AS totalCopies, 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced) ORDER BY distribID, week;";
 
         ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count publications per distributor per week");
+            return false;
+        }
 
         try {
             System.out.println("Total publications per distributor per week");
@@ -171,6 +206,11 @@ public class Reports {
 
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count publications per distributor per month");
+            return false;
+        }
+
         try {
             System.out.println("Total publications per distributor per month");
             while (table.next()) {
@@ -191,6 +231,11 @@ public class Reports {
         String query = "SELECT DISTINCT distribID, WEEK(datePlaced) AS week ,SUM(price*copies) AS totalPrice, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week , SUM(price*copies) AS totalPrice, 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced) ORDER BY distribID, week;";
         
         ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total cost per distributor per week");
+            return false;
+        }
 
         try {
             System.out.println("Total cost per distributor per week");
@@ -213,6 +258,11 @@ public class Reports {
         
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count total cost per distributor per month");
+            return false;
+        }
+
         try {
             System.out.println("Total cost per distributor per month");
             while (table.next()) {
@@ -233,6 +283,11 @@ public class Reports {
         String query = "SELECT city, SUM(revenue) AS totalRevenue FROM (SELECT city, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY city UNION ALL SELECT city, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY city) AS CombinedResults GROUP BY city;";
         
         ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total revenue per city");
+            return false;
+        }
 
         try {
             System.out.println("Total revenue per city");
@@ -255,6 +310,11 @@ public class Reports {
         
         ResultSet table = DBManager.executeQuery(query);
 
+        if (table == null) {
+            System.out.println("Couldn't count total revenue per distributor");
+            return false;
+        }
+
         try {
             System.out.println("Total revenue per distributor");
             while (table.next()) {
@@ -275,6 +335,11 @@ public class Reports {
         String query = "SELECT SUM(shippingCost) FROM `Order`;";
         
         ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't count total expenses"); 
+            return false;
+        }
 
         try {
             System.out.println("Total Expenses: " + table.getInt(0));
