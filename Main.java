@@ -145,54 +145,72 @@ public class Main {
                 // Count total number of distributors
                 case "countDistributors": {
                     Reports.countDistributors();
+                    break;
                 }
                 // Count total orders by distributor
                 case "countOrdersByDistributor": {
                     Reports.countOrdersByDistributor();
+                    break;
                 }
                 // Count total editions by distributor
                 case "countEditionsByDistributor": {
                     Reports.countEditionsByDistributor();
+                    break;
                 }
                 // Count total issues by distributor
                 case "countIssuesByDistributor": {
                     Reports.countIssuesByDistributor();
+                    break;
                 }
                 // Count total cost per issue per distributor
                 case "costPerIssuePerDistributor": {
-                    Reports.totalCostPerIssuesPerDistributor()
+                    Reports.totalCostPerIssuesPerDistributor();
+                    break;
                 }
                 // Count total cost per edition per distributor
                 case "costPerEditionPerDistributor": {
                     Reports.totalCostPerEditionPerDistributor();
+                    break;
                 }
                 // Count publications per distributor per week
                 case "countPublicationsPerDistributorPerWeek": {
                     Reports.countPublicationsPerDistributorPerWeek();
+                    break;
                 }
                 // Count publications per distributor per month
                 case "countPublicationsPerDistributorPerMonth": {
                     Reports.countPublicationsPerDistributorPerMonth();
+                    break;
                 }
                 // Total cost per distributor per week
                 case "totalCostPerDistributorPerWeek": {
                     Reports.totalCostPerDistributorPerWeek();
+                    break;
                 }
                 // Total cost per distributor per month
                 case "totalCostPerDistributorPerMonth": {
                     Reports.totalCostPerDistributorPerMonth();
+                    break;
                 }
                 // Total revenue per city
                 case "totalRevenuePerCity": {
                     Reports.totalRevenuePerCity();
+                    break;
                 }
                 // Total revenue per distributor
                 case "totalRevenuePerDistributor": {
-                    Reports.totalRevenuePerCity();
+                    Reports.totalRevenuePerDistributor();
+                    break;
+                }
+                // Total revenue
+                case "totalRevenue": {
+                    Reports.totalRevenue();
+                    break;
                 }
                 // Calculate total expenses
                 case "totalExpenses": {
                     Reports.totalExpenses();
+                    break;
                 }
                 
                 // Help Case
@@ -233,6 +251,7 @@ public class Main {
                     System.out.println("totalRevenuePerDistributor");
                     System.out.println("totalExpenses");
                     System.out.println("");
+                    break;
                 }
 
                 // Exit Case
