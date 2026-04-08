@@ -51,6 +51,7 @@ public class PeopleUI {
         System.out.println("Enter the date the payment was claimed (YYYY-MM-DD):");
         String dateClaimed = s.nextLine();
 
+        System.out.println(paymentId);
         People.claimPayment(paymentId, dateClaimed);
     }
 
