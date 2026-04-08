@@ -139,6 +139,36 @@ public class Main {
                     break;               
                 }
 
+                case "findEditionsByTopic" : {
+                    PublicationUI.handleFindEditionsByTopic(s);
+                    break;               
+                }
+                case "findArticlesByTopic" : {
+                    PublicationUI.handleFindArticlesByTopic(s);
+                    break;               
+                }
+                case "findEditionsByDateRange" : {
+                    PublicationUI.handleFindEditionsByDateRange(s);
+                    break;               
+                }
+                case "findArticlesByDateRange" : {
+                    PublicationUI.handleFindArticlesByDateRange(s);
+                    break;               
+                }
+                case "findEditionsByAuthor" : {
+                    PublicationUI.handleFindEditionsByAuthor(s);
+                    break;               
+                }
+                case "findArticlesByAuthor" : {
+                    PublicationUI.handleFindArticlesByAuthor(s);
+                    break;               
+                }
+                case "compareIssueArticles" : {
+                    PublicationUI.handleCompareIssueArticles(s);
+                    break;               
+                }
+
+
                 //////////////////////
                 // Report Operations
                 //////////////////////
@@ -165,7 +195,10 @@ public class Main {
                 // Count total cost per issue per distributor
                 case "costPerIssuePerDistributor": {
                     Reports.totalCostPerIssuesPerDistributor();
+<<<<<<< HEAD
                     break;
+=======
+>>>>>>> adf6201ddd93879fa93a948c22a568583c45ddaa
                 }
                 // Count total cost per edition per distributor
                 case "costPerEditionPerDistributor": {
