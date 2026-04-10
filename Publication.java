@@ -5,18 +5,26 @@ import java.sql.SQLException;
 
 //TODO: 
  // NEED WRITESCHAPTER AND WRITES ARTICLE UPDATES
-// Update contains(pubID containing an ISBN) in ui and here with transaction
-// Null value handling and UI
-// do we want add chapter to contain chapter details or not?
-// same for articles
+
 // State character limits
-// Incorrect date format handling
 
 // PROMPT USER IF THEY WANT IT TO BE AN EDITION OR NOT
 // WHEN ADDING EDITION SEPARATELY< MAKE SURE PUBID IS SAVED FOR IT
 
 
-
+/**
+ * Testing:
+ * 1. Add publication without edition
+ * 2. Add publication with edition (check all three tables)
+ * 3. Add publication and later add edition (check all three tables)
+ * 4. Remove publication with edition (check all three tables)
+ * 5. Null checking for everything that can have a null
+ * 6. Set author of chapter and article initially
+ * 7. Set updates to chapter and article author
+ * 8. Probably just everything in general
+ * 
+ * 
+ */
 public class Publication{
   // Adding publications in general (periodic or non periodic without edition link)
 
@@ -543,6 +551,72 @@ public class Publication{
     }
 
     return true;
+  }
+
+  public static boolean updateChapterAuthor(long ISBN, String chapterTitle, int pID, boolean invited){
+    String query = "SELECT * FROM WritesChapter WHERE ISBN = %d AND chapterTitle = '%s'";
+    query = String.format(query, ISBN, chapterTitle);
+    ResultSet table = DBManager.executeQuery(query);
+    try{
+      // If chapter hasn't been given an author yet
+      if(table == null){
+        query = "INSERT INTO WritesChapter VALUES (%d, '%s', %d, %d)";
+        query = String.format(query, pID, chapterTitle, ISBN, invited ? 1 : 0);
+        if(!DBManager.executeUpdate(query)){
+          System.out.println("Couldn't set chapter author in database\n");
+          return false;
+        }
+        System.out.println("Chapter author set successfully\n");
+        return true;
+      }
+      // If chapter has an author already, we must update
+      else{
+        query = "UPDATE WritesChapter SET pID = %d, invited = %d WHERE ISBN = %d AND chapterTitle = '%s'";
+        query = String.format(query, pID, invited ? 1 : 0, ISBN, chapterTitle);
+        if(!DBManager.executeUpdate(query)){
+          System.out.println("Couldn't update chapter author in database\n");
+          return false;
+        }
+        System.out.println("Chapter author updated successfully\n");
+        return true;
+      }
+    } catch(Exception e){
+      System.out.println("Error processing results\n");
+      return false;
+    }
+  }
+
+  public static boolean updateArticleAuthor(int pubID, String issueTitle, String articleTitle, int pID, boolean invited){
+    String query = "SELECT * FROM WritesArticle WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
+    query = String.format(query, pubID, issueTitle, articleTitle);
+    ResultSet table = DBManager.executeQuery(query);
+    try{
+      // If article hasn't been given an author yet
+      if(table == null){
+        query = "INSERT INTO WritesArticle VALUES (%d, %d, '%s', '%s', %d)";
+        query = String.format(query, pID, pubID, articleTitle, issueTitle, invited ? 1 : 0);
+        if(!DBManager.executeUpdate(query)){
+          System.out.println("Couldn't set article author in database\n");
+          return false;
+        }
+        System.out.println("Article author set successfully\n");
+        return true;
+      }
+      // If article has an author already, we must update
+      else{
+        query = "UPDATE WritesArticle SET pID = %d, invited = %d WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
+        query = String.format(query, pID, invited ? 1 : 0, pubID, issueTitle, articleTitle);
+        if(!DBManager.executeUpdate(query)){
+          System.out.println("Couldn't update article author in database\n");
+          return false;
+        }
+        System.out.println("Article author updated successfully\n");
+        return true;
+      }
+    } catch(Exception e){
+      System.out.println("Error processing results\n");
+      return false;
+    }
   }
 
 }
