@@ -29,14 +29,14 @@ public class Distributor{
      * @return true if the distributor was successfully added, false otherwise
      * @throws SQLException if a database access error occurs
      */
-    public boolean addDistributor(String distribID, float balance, String contactName, String phoneNumber, String category, String name, String street, String city, String state) throws SQLException {
-        String sql = "INSERT INTO Distributor VALUES('%s', %f, '%s', '%s', '%s', '%s', '%s', '%s', '%s') ";
-        sql = String.format(sql,distribID,balance,contactName,phoneNumber,category,name, street, city, state);
+    public boolean addDistributor(int distribID, float balance, String contactName, String phoneNumber, String category, String name, String street, String city, String state) throws SQLException {
+        String sql = "INSERT INTO Distributor VALUES(%d, %f, '%s', '%s', '%s', '%s', '%s', '%s', '%s') ";
+        sql = String.format(java.util.Locale.US,sql,distribID,balance,contactName,phoneNumber,category,name, street, city, state);
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't add this distributor");
             return false;
         }
-
+        DBManager.commitTransaction();
         return true;
     }
 
@@ -203,6 +203,145 @@ public class Distributor{
      * @return
      * @throws SQLException
      */
+    public boolean receivePayment(int oID, int distribID) {
+
+        //Update order payment status
+        String sql = String.format(
+            "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = %d",
+            "Payed", oID  
+        );
+        
+        if (!DBManager.executeUpdate(sql)) {
+            System.out.println("It is not possible to pay this order");
+            return false;
+        }
+        
+        //Get current distributor balance
+        String sql2 = String.format(
+            "SELECT balance FROM Distributor WHERE distribID = %d", 
+            distribID
+        );
+        ResultSet rs = DBManager.executeQuery(sql2);
+        float balance = 0.0f;
+        
+        try {
+            if (rs.next()) {  
+                balance = rs.getFloat("balance");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        
+        // Get order total 
+        float orderTotal = getOrderTotal(oID); 
+        
+        // Update distributor balance 
+        float newBalance = balance - orderTotal;
+        
+        String sql3 = String.format(
+            "UPDATE Distributor SET balance = %f WHERE distribID = %d",  
+            newBalance, distribID
+        );
+        
+        if (!DBManager.executeUpdate(sql3)) {
+            System.out.println("Failed to update distributor balance");
+            return false;
+        }
+        
+        System.out.println("Payment received. New balance: $" + newBalance);
+        return true;
+    }
+
+    public static float getOrderTotal(int orderID) {
+        // Try issues first
+        String query = 
+            "SELECT (o.copies * i.price + o.shippingCost) AS orderTotal " +
+            "FROM `Order` o " +
+            "JOIN ContainsIssue ci ON o.oID = ci.oID " +
+            "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
+            "WHERE o.oID = " + orderID;
+        
+        ResultSet rs = DBManager.executeQuery(query);
+        
+        try {
+            if (rs.next()) {
+                return rs.getFloat("orderTotal");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        // Try editions
+        query = 
+            "SELECT (o.copies * e.price + o.shippingCost) AS orderTotal " +
+            "FROM `Order` o " +
+            "JOIN ContainsISBN cisbn ON o.oID = cisbn.oID " +
+            "JOIN Edition e ON cisbn.ISBN = e.ISBN " +
+            "WHERE o.oID = " + orderID;
+        
+        rs = DBManager.executeQuery(query);
+        
+        try {
+            if (rs.next()) {
+                return rs.getFloat("orderTotal");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return 0.0f;
+    }
+
+
+    public static boolean listUnpaidOrders(int distribID) {
+        String query =
+                "SELECT o.oID, o.datePlaced, o.dueBy, o.shippingCost, o.copies, " +
+                "o.deliveryStatus, o.paymentStatus " +
+                "FROM `Order` o " +
+                "NATURAL JOIN PlacedBy pb " +
+                "WHERE o.paymentStatus != 'Paid' " +
+                "AND pb.distribID = %d;";
+        
+        query = String.format(query, distribID);
+        
+        ResultSet rs = DBManager.executeQuery(query);
+        
+        try {
+            System.out.println("\n=== Unpaid Orders - Distributor " + distribID + " ===\n");
+            
+            boolean hasResults = false;
+            while (rs.next()) {
+                hasResults = true;
+                int oID = rs.getInt("oID");
+                String datePlaced = rs.getString("datePlaced");
+                String dueBy = rs.getString("dueBy");
+                float shippingCost = rs.getFloat("shippingCost");
+                int copies = rs.getInt("copies");
+                String deliveryStatus = rs.getString("deliveryStatus");
+                String paymentStatus = rs.getString("paymentStatus");
+                
+                System.out.println("Order ID: " + oID + 
+                                " | Date Placed: " + datePlaced + 
+                                " | Due By: " + dueBy +
+                                " | Copies: " + copies + 
+                                " | Shipping: $" + shippingCost +
+                                " | Delivery Status: " + deliveryStatus + 
+                                " | Payment Status: " + paymentStatus);
+            }
+            
+            if (!hasResults) {
+                System.out.println("No unpaid orders found in that date range.");
+            }
+            
+            return hasResults;
+            
+        } catch (SQLException e) {
+            System.err.println("Error querying unpaid orders: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
     public boolean receivePayment(int distribID, float newBalance) throws SQLException {
 
         String sql = String.format(

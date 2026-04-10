@@ -10,7 +10,7 @@ public class DistributorUI {
 
     public static void handleAddDistributor(Scanner s, Distributor distributor) {
         System.out.println("Enter Distributor ID: ");
-        String distribID = s.nextLine();
+        int distribID = Integer.parseInt(s.nextLine());
         System.out.println("Enter balance: ");
         float balance = Float.parseFloat(s.nextLine());
         System.out.println("Enter contact name: ");
@@ -149,17 +149,29 @@ public class DistributorUI {
     }
 
     public static void handleReceivePayment(Scanner s, Distributor distributor) {
-        System.out.println("Enter Distributor ID: ");
+        System.out.print("Enter Distributor ID: ");
         int distribID = Integer.parseInt(s.nextLine());
-        System.out.println("Enter the new balance;");
-        float newBalance = Float.parseFloat(s.nextLine());
-        try {
-            distributor.receivePayment(distribID, newBalance);
-            System.out.println("The balance was updated");
-        } catch (SQLException e) {
-            e.printStackTrace();
+        
+        boolean hasOrders = Distributor.listUnpaidOrders(distribID);
+        
+        if (!hasOrders) {
+            System.out.println("No unpaid orders found for this distributor.");
+            return;
+        }
+        
+        System.out.print("Enter the ID of the order you want to pay: ");
+        int oID = Integer.parseInt(s.nextLine());
+        
+        boolean success = distributor.receivePayment(oID, distribID);
+        
+        if (success) {
+            System.out.println("Payment received successfully!");
+        } else {
+            System.out.println("Payment failed. Please check the order ID.");
         }
     }
+
+
 
     public static void handleIdentifyMismatchedDistributors(Scanner s, Distributor distributor) {
         try {
