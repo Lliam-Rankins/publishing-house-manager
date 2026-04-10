@@ -81,6 +81,10 @@ public class Main {
                         DistributorUI.handleListDistributors(s, distributor);
                         break;
                     }
+
+                    ////////////////////////
+                    // Publication Operations
+                    /////////////////////////
                     case "addPublication": {
                         PublicationUI.handleAddPublication(s);
                         break;
@@ -93,16 +97,16 @@ public class Main {
                         PublicationUI.handleRemovePublication(s);
                         break;
                     }
-                    case "addBookEdition": {
-                        PublicationUI.handleAddBookEdition(s);
+                    case "addBookEditionToPub": {
+                        PublicationUI.handleAddBookEditionToExistingPub(s);
                         break;
                     }
                     case "updateBookEdition": {
                         PublicationUI.handleUpdateBookEdition(s);
                         break;
                     }
-                    case "removeBookEdition": {
-                        PublicationUI.handleRemoveBookEdition(s);
+                    case "removeBookEditionAndPub": {
+                        PublicationUI.handleRemoveBookEditionAndPublication(s);
                         break;
                     }
                     case "addIssue": {
@@ -198,10 +202,7 @@ public class Main {
                 // Count total cost per issue per distributor
                 case "costPerIssuePerDistributor": {
                     Reports.totalCostPerIssuesPerDistributor();
-<<<<<<< HEAD
                     break;
-=======
->>>>>>> adf6201ddd93879fa93a948c22a568583c45ddaa
                 }
                 // Count total cost per edition per distributor
                 case "costPerEditionPerDistributor": {
@@ -251,6 +252,31 @@ public class Main {
                 
                 // Help Case
                 case "help": {
+                    // Publication Operations
+                    System.out.println("-----Publication Operations-----");
+                    System.out.println("addPublication");
+                    System.out.println("updatePublication");
+                    System.out.println("removePublication");
+                    System.out.println("addBookEditionToPub");
+                    System.out.println("updateBookEdition");
+                    System.out.println("removeBookEditionAndPub");
+                    System.out.println("addIssue");
+                    System.out.println("editIssue");
+                    System.out.println("removeIssue");
+                    System.out.println("addChapter");
+                    System.out.println("editChapter");
+                    System.out.println("removeChapter");
+                    System.out.println("addArticle");
+                    System.out.println("editArticle");
+                    System.out.println("removeArticle");
+                    System.out.println("findEditionsByTopic");
+                    System.out.println("findArticlesByTopic");
+                    System.out.println("findEditionsByDateRange");
+                    System.out.println("findArticlesByDateRange");
+                    System.out.println("findEditionsByAuthor");
+                    System.out.println("findArticlesByAuthor");
+                    System.out.println("compareIssueArticles");
+                    System.out.println("");
                     // People Operations
                     System.out.println("-----People Operations-----");
                     System.out.println("assignEditorToPublication");
@@ -260,17 +286,17 @@ public class Main {
                     System.out.println("listUnclaimedPayments");
                     System.out.println("");
 
-                        // Distributor Operations
-                        System.out.println("-----Distributor Operations-----");
-                        System.out.println("addDistributor");
-                        System.out.println("updateDistributor");
-                        System.out.println("deleteDistributor");
-                        System.out.println("inputOrder");
-                        System.out.println("billDistributor");
-                        System.out.println("receivePayment");
-                        System.out.println("identifyMismatchedDistributors");
-                        System.out.println("listDistributors");
-                        System.out.println("");
+                    // Distributor Operations
+                    System.out.println("-----Distributor Operations-----");
+                    System.out.println("addDistributor");
+                    System.out.println("updateDistributor");
+                    System.out.println("deleteDistributor");
+                    System.out.println("inputOrder");
+                    System.out.println("billDistributor");
+                    System.out.println("receivePayment");
+                    System.out.println("identifyMismatchedDistributors");
+                    System.out.println("listDistributors");
+                    System.out.println("");
 
                     // Report Operations
                     System.out.println("-----Report Operations-----");

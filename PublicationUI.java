@@ -7,19 +7,43 @@ public class PublicationUI {
     System.out.println("Enter Publication ID: ");
     pubID = s.nextInt();
     s.nextLine();
-    System.out.println("Enter title (null if there is none): ");
+    System.out.println("Enter title (press enter if there is none): ");
     title = s.nextLine();
     System.out.println("Enter type: ");
     type = s.nextLine();
-    System.out.println("Enter periodicity (null if NA): ");
+    System.out.println("Enter periodicity (press enter if publication is a book): ");
     pubPeriodicity = s.nextLine();
-    if(pubPeriodicity.equalsIgnoreCase("null")){
+    if(pubPeriodicity.equalsIgnoreCase("")){
       pubPeriodicity = null;
-    }
-    Publication.addPublication(pubID, title, type, pubPeriodicity);
-    
+      System.out.println("Would you like to add this publication as an edition of a book? y/n");
+      String response = s.nextLine();
+      if(response.equalsIgnoreCase("y")){
+        System.out.println("Enter ISBN: ");
+        long ISBN = s.nextLong();
+        s.nextLine();
+        System.out.println("Enter edition number: ");
+        int edition = s.nextInt();
+        s.nextLine();
+        System.out.println("Enter edition title (null if there is none): ");
+        String editionTitle = s.nextLine();
+        System.out.println("Enter date written (YYYY-MM-DD): ");
+        java.sql.Date dateWritten = java.sql.Date.valueOf(s.nextLine());
+        System.out.println("Enter date published (YYYY-MM-DD): ");
+        java.sql.Date datePublished = java.sql.Date.valueOf(s.nextLine());
+        System.out.println("Enter price: ");
+        double price = s.nextDouble();
+        s.nextLine();
+        Publication.addEditionPublication(pubID, title, type, ISBN, edition, editionTitle, dateWritten, datePublished, price);
+      }
+      else{
+        Publication.addPublication(pubID, title, type, pubPeriodicity);
 
+    }
   }
+  else{
+    Publication.addPublication(pubID, title, type, pubPeriodicity);
+  }
+}
 
   public static void handleUpdatePublication(Scanner s){
 
@@ -45,7 +69,7 @@ public class PublicationUI {
   }
 
 
-  public static void handleAddBookEdition(Scanner s){
+  public static void handleAddBookEditionToExistingPub(Scanner s){
     int pubID;
     long ISBN; 
     int edition; 
@@ -71,7 +95,7 @@ public class PublicationUI {
     System.out.println("Enter price: ");
     price = s.nextDouble();
     s.nextLine();
-    Publication.addBookEdition(pubID, ISBN, edition, editionTitle, dateWritten, datePublished, price);    
+    Publication.addBookEditionToExistingPub(pubID, ISBN, edition, editionTitle, dateWritten, datePublished, price);    
   }
 
   public static void handleUpdateBookEdition(Scanner s){
@@ -94,12 +118,16 @@ public class PublicationUI {
     Publication.updateBookEdition(ISBN, edition, editionTitle, dateWritten, datePublished, price);
   }
 
-  public static void handleRemoveBookEdition(Scanner s){
+  public static void handleRemoveBookEditionAndPublication(Scanner s){
+    int pubID;
     long ISBN;
+    System.out.println("Enter publication ID: ");
+    pubID = s.nextInt();
+    s.nextLine();
     System.out.println("Enter ISBN: ");
     ISBN = s.nextLong();
     s.nextLine();
-    Publication.removeBookEdition(ISBN);
+    Publication.removeBookEditionAndPublication(pubID, ISBN);
   }
 
   public static void handleAddIssue(Scanner s){

@@ -1,4 +1,5 @@
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /** Assert fields are proper length = titles, ISBN, type etc */
 
@@ -9,92 +10,154 @@ import java.sql.ResultSet;
 // do we want add chapter to contain chapter details or not?
 // same for articles
 // State character limits
-// EXCEPTION HANDLING
 // Incorrect date format handling
+
+// PROMPT USER IF THEY WANT IT TO BE AN EDITION OR NOT
+// WHEN ADDING EDITION SEPARATELY< MAKE SURE PUBID IS SAVED FOR IT
 
 
 
 public class Publication{
+  // Adding publications in general (periodic or non periodic without edition link)
   public static boolean addPublication(int pubID, String title, String type, String pubPeriodicity){
     String query = "INSERT INTO Publication VALUES (%d, '%s', '%s', '%s')";
     query = String.format(query, pubID, type, title, pubPeriodicity);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't add publication to database");
+      System.out.println("Couldn't add publication to database\n");
       return false;
     }
-    System.out.println("Publication added successfully");
+    System.out.println("Publication added successfully\n");
     return true;
   }
 
+  // Adding publications and edition with edition link
+  public static boolean addEditionPublication(int pubID, String title, String type, long ISBN, int edition, String editionTitle, java.sql.Date dateWritten, java.sql.Date datePublished, double price){
+    DBManager.beginTransaction();
+    String query = "INSERT INTO Publication VALUES (%d, '%s', '%s', NULL)";
+    query = String.format(query, pubID, type, title);
+    if(!DBManager.executeUpdate(query)){
+      System.out.println("Couldn't add publication to database\n");
+      DBManager.rollbackTransaction();
+      return false;
+    }
+    query = "INSERT INTO Edition VALUES (%d, %d, '%s', '%s', '%s', %f)";
+    query = String.format(query, ISBN, edition, editionTitle, dateWritten, datePublished, price);
+    if(!DBManager.executeUpdate(query)){
+      System.out.println("Couldn't add edition to database\n");
+      DBManager.rollbackTransaction();
+      return false;
+    }
+    query = "INSERT INTO ISBNPublication VALUES (%d, %d)";
+    query = String.format(query, ISBN, pubID);
+    if(!DBManager.executeUpdate(query)){
+      System.out.println("Couldn't link ISBN to publication\n");
+      DBManager.rollbackTransaction();
+      return false;
+    }
+    DBManager.commitTransaction();
+    return true;
+  }
+
+  // Updating just the publication details
   public static boolean updatePublication(int pubID, String title, String type, String pubPeriodicity){
     String query = "UPDATE Publication SET title = '%s', type = '%s', pubPeriodicity = '%s' WHERE pubID = %d";
     query = String.format(query, title, type, pubPeriodicity, pubID);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't update publication in database");
+      System.out.println("Couldn't update publication in database\n");
       return false;
     }
-    System.out.println("Publication updated successfully");
+    System.out.println("Publication updated successfully\n");
     
     return true;
   }
 
+  // Remove the publication
   public static boolean removePublication(int pubID){
     String query = "DELETE FROM Publication WHERE pubID = %d";
     query = String.format(query, pubID);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't remove publication from database");
+      System.out.println("Couldn't remove publication from database\n");
       return false;
     }
-    System.out.println("Publication removed successfully");
+    System.out.println("Publication removed successfully\n");
     
     return true;
   }
 
-  public static boolean addBookEdition(int pubID, long ISBN, int edition, String editionTitle, java.sql.Date dateWritten, java.sql.Date datePublished, double price){
-   String query = "INSERT INTO Edition VALUES (%d, %d, '%s', '%s', '%s', %f)";
-   query = String.format(query, ISBN, edition, editionTitle, dateWritten, datePublished, price);
+  // Adding edition to an existing publication and linking it with the publication
+  public static boolean addBookEditionToExistingPub(int pubID, long ISBN, int edition, String editionTitle, java.sql.Date dateWritten, java.sql.Date datePublished, double price){
+    String query = "SELECT * FROM Publication WHERE pubID = %d";
+    query = String.format(query, pubID);
+    try {
+      if(!DBManager.executeQuery(query).next()){
+        System.out.println("Publication not found\n");
+        return false;
+      }
+    } catch (SQLException e) {
+      System.out.println("Error processing results\n");
+      return false;
+    }
+    DBManager.beginTransaction();
+    query = "INSERT INTO Edition VALUES (%d, %d, '%s', '%s', '%s', %f)";
+    query = String.format(query, ISBN, edition, editionTitle, dateWritten, datePublished, price);
    if(!DBManager.executeUpdate(query)){
-     System.out.println("Couldn't add book edition to database");
+     System.out.println("Couldn't add book edition to database\n");
+      DBManager.rollbackTransaction();
     return false;
     }
     query = "INSERT INTO ISBNPublication VALUES (%d, %d)";
     query = String.format(query, ISBN, pubID);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't link ISBN to publication");
+      System.out.println("Couldn't link ISBN to publication\n");
+      DBManager.rollbackTransaction();
       return false;
     }
-    System.out.println("Book edition added successfully");
-  
-   return true;
-}
+    System.out.println("Book edition added successfully\n");
+    DBManager.commitTransaction();
+    return true;
+  }
 
+  // Updating just the edition details
   public static boolean updateBookEdition(long ISBN, int edition, String editionTitle, java.sql.Date dateWritten, java.sql.Date datePublished, double price){
     String query = "UPDATE Edition SET edition = %d, editionTitle = '%s', dateWritten = '%s', datePublished = '%s', price = %f WHERE ISBN = %d";
     query = String.format(query, edition, editionTitle, dateWritten, datePublished, price, ISBN);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't update book edition in database");
+      System.out.println("Couldn't update book edition in database\n");
       return false;
     }
-    System.out.println("Book edition updated successfully");
+    System.out.println("Book edition updated successfully\n");
     return true;
   }
 
-  public static boolean removeBookEdition(long ISBN){
+  // Needs transaction with removal from 3 tables
+  public static boolean removeBookEditionAndPublication(int pubID, long ISBN){
+    DBManager.beginTransaction();
     String query = "DELETE FROM ISBNPublication WHERE ISBN = %d";
     query = String.format(query, ISBN);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't remove edition-publication link from database");
+      System.out.println("Couldn't remove edition-publication link from database\n");
+      DBManager.rollbackTransaction();
       return false;
     }
     
     query = "DELETE FROM Edition WHERE ISBN = %d";
     query = String.format(query, ISBN);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't remove book edition from database");
+      System.out.println("Couldn't remove book edition from database\n");
+      DBManager.rollbackTransaction();
       return false;
     }
 
-    System.out.println("Book edition removed successfully");
+    query = "DELETE FROM Publication WHERE pubID = %d";
+    query = String.format(query, pubID);
+    if(!DBManager.executeUpdate(query)){
+      System.out.println("Couldn't remove publication from database\n");
+      DBManager.rollbackTransaction();
+      return false;
+    }
+
+    System.out.println("Book edition removed successfully\n");
+    DBManager.commitTransaction();
     return true;
   }
 
@@ -102,10 +165,10 @@ public class Publication{
     String query = "INSERT INTO Issue VALUES (%d, '%s', '%s', %f)";
     query = String.format(query, pubID, issueTitle, pubDate, price);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't add issue to database"); 
+      System.out.println("Couldn't add issue to database\n"); 
       return false;
     }
-    System.out.println("Issue added successfully");
+    System.out.println("Issue added successfully\n");
     return true;
   }
 
@@ -113,10 +176,10 @@ public class Publication{
     String query = "UPDATE Issue SET pubDate = '%s', price = %f WHERE pubID = %d AND issueTitle = '%s'";
     query = String.format(query, pubDate, price, pubID, issueTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't update issue in database");
+      System.out.println("Couldn't update issue in database\n");
       return false;
     }
-    System.out.println("Issue updated successfully");
+    System.out.println("Issue updated successfully\n");
     return true;
   }
 
@@ -124,10 +187,10 @@ public class Publication{
     String query = "DELETE FROM Issue WHERE pubID = %d AND issueTitle = '%s'";
     query = String.format(query, pubID, issueTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't remove issue from database");
+      System.out.println("Couldn't remove issue from database\n");
       return false;
     }
-    System.out.println("Issue removed successfully");
+    System.out.println("Issue removed successfully\n");
     return true;
   }
 
@@ -137,10 +200,10 @@ public class Publication{
     String query = "INSERT INTO Chapter VALUES (%d, '%s', NULL, NULL, NULL)";
     query = String.format(query, ISBN, chapterTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't add chapter to database");
+      System.out.println("Couldn't add chapter to database\n");
       return false;
     }
-    System.out.println("Chapter added successfully");
+    System.out.println("Chapter added successfully\n");
     return true;
   }
 
@@ -148,10 +211,10 @@ public class Publication{
     String query = "UPDATE Chapter SET date = '%s', text = '%s', topic = '%s' WHERE ISBN = %d AND chapterTitle = '%s'";
     query = String.format(query, date, text, topic, ISBN, chapterTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't update chapter in database");
+      System.out.println("Couldn't update chapter in database\n");
       return false;
     }
-    System.out.println("Chapter updated successfully");
+    System.out.println("Chapter updated successfully\n");
     return true;
   }
 
@@ -159,10 +222,10 @@ public class Publication{
     String query = "DELETE FROM Chapter WHERE ISBN = %d AND chapterTitle = '%s'";
     query = String.format(query, ISBN, chapterTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't remove chapter from database");
+      System.out.println("Couldn't remove chapter from database\n");
       return false;
     }
-    System.out.println("Chapter removed successfully");
+    System.out.println("Chapter removed successfully\n");
     return true;
   }
 
@@ -170,10 +233,10 @@ public class Publication{
     String query = "INSERT INTO Article VALUES (%d, '%s', '%s', NULL, NULL, NULL)";
     query = String.format(query, pubID, issueTitle, articleTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't add article to database");
+      System.out.println("Couldn't add article to database\n");
       return false;
     }
-    System.out.println("Article added successfully");
+    System.out.println("Article added successfully\n");
     return true;
   }
 
@@ -181,10 +244,10 @@ public class Publication{
     String query = "UPDATE Article SET dateWritten = '%s', text = '%s', topic = '%s' WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
     query = String.format(query, dateWritten, text, topic, pubID, issueTitle, articleTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't update article in database");
+      System.out.println("Couldn't update article in database\n");
       return false;
     }
-    System.out.println("Article updated successfully");
+    System.out.println("Article updated successfully\n");
     return true;
   }
 
@@ -192,10 +255,10 @@ public class Publication{
     String query = "DELETE FROM Article WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
     query = String.format(query, pubID, issueTitle, articleTitle);
     if(!DBManager.executeUpdate(query)){
-      System.out.println("Couldn't remove article from database");  
+      System.out.println("Couldn't remove article from database\n");
       return false;
     }
-    System.out.println("Article removed successfully");
+    System.out.println("Article removed successfully\n");
     return true;
   }
 
@@ -205,7 +268,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find books with given topic");
+        System.out.println("Couldn't find books with given topic\n");
         return true;
       }
       else{
@@ -221,13 +284,13 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
 
     }
 
 
-    System.out.println("Books found successfully");
+    System.out.println("Books found successfully\n");
     return true;
   }
 
@@ -237,7 +300,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find articles with given topic");
+        System.out.println("Couldn't find articles with given topic\n");
         return true;
       }
       else{
@@ -252,13 +315,13 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
 
     }
 
 
-    System.out.println("Articles found successfully");
+    System.out.println("Articles found successfully\n");
     return true;
     }
 
@@ -268,7 +331,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find books published in given date range");
+        System.out.println("Couldn't find books published in given date range\n");
         return true;
       }
       else{
@@ -284,7 +347,7 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
     }
     return true;
@@ -296,7 +359,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find articles written in given date range");
+        System.out.println("Couldn't find articles written in given date range\n");
         return true;
       }
       else{
@@ -311,7 +374,7 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
     }
     return true;
@@ -324,7 +387,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find books with given author");
+        System.out.println("Couldn't find books with given author\n");
         return true;
       }
       else{
@@ -340,7 +403,7 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
 
     }
@@ -355,7 +418,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find articles with given author");
+        System.out.println("Couldn't find articles with given author\n");
         return true;
       }
       else{
@@ -370,7 +433,7 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
 
     }
@@ -384,7 +447,7 @@ public class Publication{
     ResultSet table = DBManager.executeQuery(query);
     try{
       if(table == null){
-        System.out.println("Couldn't find articles for given issues");
+        System.out.println("Couldn't find articles for given issues\n");
         return true;
       }
       else {
@@ -401,7 +464,7 @@ public class Publication{
 
       }
     } catch(Exception e){
-      System.out.println("Error processing results");
+      System.out.println("Error processing results\n");
       return false;
     }
 
