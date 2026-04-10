@@ -77,7 +77,7 @@ public class PublicationUI {
     java.sql.Date dateWritten;
     java.sql.Date datePublished;
     double price;
-    System.out.println("Enter publication ID: ");
+    System.out.println("Enter publication ID (must have null periodicity): ");
     pubID = s.nextInt();
     s.nextLine();
     System.out.println("Enter ISBN: ");
@@ -128,6 +128,14 @@ public class PublicationUI {
     ISBN = s.nextLong();
     s.nextLine();
     Publication.removeBookEditionAndPublication(pubID, ISBN);
+  }
+
+  public static void handleRemoveBookEditionNotPublication(Scanner s){
+    long ISBN;
+    System.out.println("Enter ISBN: ");
+    ISBN = s.nextLong();
+    s.nextLine();
+    Publication.removeBookEditionNotPub(ISBN);
   }
 
   public static void handleAddIssue(Scanner s){
@@ -316,5 +324,39 @@ public class PublicationUI {
     issueTitle2 = s.nextLine();
     Publication.compareIssueArticles(pubID, issueTitle1, issueTitle2);
   }
+
+  public static void handleUpdateChapterAuthor(Scanner s){
+    long ISBN; String chapterTitle; int pID; boolean invited;
+    System.out.println("Enter ISBN: ");
+    ISBN = s.nextLong();
+    s.nextLine();
+    System.out.println("Enter chapter title: ");
+    chapterTitle = s.nextLine();
+    System.out.println("Enter author pID: ");
+    pID = s.nextInt();
+    s.nextLine();
+    System.out.println("Is the author invited? (true/false): ");
+    invited = s.nextBoolean();
+    s.nextLine();
+    Publication.updateChapterAuthor(ISBN, chapterTitle, pID, invited);
+  }
+
+  public static void handleUpdateArticleAuthor(Scanner s){
+    int pubID; String issueTitle; String articleTitle; int pID; boolean invited;
+    System.out.println("Enter publication ID: ");
+    pubID = s.nextInt();
+    s.nextLine();
+    System.out.println("Enter issue title: ");
+    issueTitle = s.nextLine();
+    System.out.println("Enter article title: ");
+    articleTitle = s.nextLine();
+    System.out.println("Enter author pID: ");
+    pID = s.nextInt();
+    s.nextLine();
+    System.out.println("Is the author invited? (true/false): ");
+    invited = s.nextBoolean();
+    s.nextLine();
+    Publication.updateArticleAuthor(pubID, issueTitle, articleTitle, pID, invited);
   
+  }
 }

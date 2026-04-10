@@ -70,6 +70,15 @@ public class DBManager {
         return true;
     }
 
+    // For queries where we want to know how many rows affected
+    public static int executeUpdateCount(String query){
+        try {
+            return statement.executeUpdate(query);
+        } catch(SQLException e){
+            return -1;
+        }
+    }
+
     public static void createTables() {
         try {
             statement.executeUpdate(

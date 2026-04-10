@@ -97,16 +97,20 @@ public class Main {
                         PublicationUI.handleRemovePublication(s);
                         break;
                     }
-                    case "addBookEditionToPub": {
+                    case "addEditionToPub": {
                         PublicationUI.handleAddBookEditionToExistingPub(s);
                         break;
                     }
-                    case "updateBookEdition": {
+                    case "updateEdition": {
                         PublicationUI.handleUpdateBookEdition(s);
                         break;
                     }
-                    case "removeBookEditionAndPub": {
+                    case "removeEditionAndPub": {
                         PublicationUI.handleRemoveBookEditionAndPublication(s);
+                        break;
+                    }
+                    case "removeEditionNotPub": {
+                        PublicationUI.handleRemoveBookEditionNotPublication(s);
                         break;
                     }
                     case "addIssue": {
@@ -129,6 +133,10 @@ public class Main {
                         PublicationUI.handleEditChapter(s);
                         break;
                     }
+                    case "editChapterAuthor": {
+                        PublicationUI.handleUpdateChapterAuthor(s);
+                        break;
+                    }
                     case "removeChapter": {
                         PublicationUI.handleRemoveChapterTOC(s);
                         break;
@@ -139,6 +147,10 @@ public class Main {
                     }
                     case "editArticle": {
                         PublicationUI.handleEditArticle(s);
+                        break;
+                    }
+                    case "editArticleAuthor": {
+                        PublicationUI.handleUpdateArticleAuthor(s);
                         break;
                     }
                     case "removeArticle": {
@@ -257,17 +269,20 @@ public class Main {
                     System.out.println("addPublication");
                     System.out.println("updatePublication");
                     System.out.println("removePublication");
-                    System.out.println("addBookEditionToPub");
-                    System.out.println("updateBookEdition");
-                    System.out.println("removeBookEditionAndPub");
+                    System.out.println("addEditionToPub");
+                    System.out.println("updateEdition");
+                    System.out.println("removeEditionAndPub");
+                    System.out.println("removeEditionNotPub");
                     System.out.println("addIssue");
                     System.out.println("editIssue");
                     System.out.println("removeIssue");
                     System.out.println("addChapter");
                     System.out.println("editChapter");
+                    System.out.println("editChapterAuthor");
                     System.out.println("removeChapter");
                     System.out.println("addArticle");
                     System.out.println("editArticle");
+                    System.out.println("editArticleAuthor");
                     System.out.println("removeArticle");
                     System.out.println("findEditionsByTopic");
                     System.out.println("findArticlesByTopic");
