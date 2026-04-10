@@ -24,13 +24,13 @@ public class PublicationUI {
         System.out.println("Enter edition number: ");
         int edition = s.nextInt();
         s.nextLine();
-        System.out.println("Enter edition title (null if there is none): ");
+        System.out.println("Enter edition title (enter if there is none): ");
         String editionTitle = s.nextLine();
-        System.out.println("Enter date written (YYYY-MM-DD): ");
+        System.out.println("Enter date written (YYYY-MM-DD) (enter if there is none): ");
         java.sql.Date dateWritten = java.sql.Date.valueOf(s.nextLine());
-        System.out.println("Enter date published (YYYY-MM-DD): ");
+        System.out.println("Enter date published (YYYY-MM-DD) (enter if there is none): ");
         java.sql.Date datePublished = java.sql.Date.valueOf(s.nextLine());
-        System.out.println("Enter price: ");
+        System.out.println("Enter price (use -1 if there is none) : ");
         double price = s.nextDouble();
         s.nextLine();
         Publication.addEditionPublication(pubID, title, type, ISBN, edition, editionTitle, dateWritten, datePublished, price);
@@ -55,7 +55,7 @@ public class PublicationUI {
   title = s.nextLine();
   System.out.println("Enter new type: ");
   type = s.nextLine();
-  System.out.println("Enter new periodicity (null if NA): ");
+  System.out.println("Enter new periodicity (enter if there is none): ");
   pubPeriodicity = s.nextLine();
   Publication.updatePublication(pubID, title, type, pubPeriodicity);
 }
@@ -86,13 +86,13 @@ public class PublicationUI {
     System.out.println("Enter edition number: ");
     edition = s.nextInt();
     s.nextLine();
-    System.out.println("Enter edition title (null if there is none): ");
+    System.out.println("Enter edition title (enter if there is none): ");
     editionTitle = s.nextLine();
-    System.out.println("Enter date written (YYYY-MM-DD): ");
+    System.out.println("Enter date written (YYYY-MM-DD) (enter if there is none): ");
     dateWritten = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter date published (YYYY-MM-DD): ");
+    System.out.println("Enter date published (YYYY-MM-DD) (enter if there is none): ");
     datePublished = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter price: ");
+    System.out.println("Enter price (use -1 if there is none): ");
     price = s.nextDouble();
     s.nextLine();
     Publication.addBookEditionToExistingPub(pubID, ISBN, edition, editionTitle, dateWritten, datePublished, price);    
@@ -106,13 +106,13 @@ public class PublicationUI {
     System.out.println("Enter new edition number: ");
     edition = s.nextInt();
     s.nextLine();
-    System.out.println("Enter new edition title: ");
+    System.out.println("Enter new edition title (enter if there is none): ");
     editionTitle = s.nextLine();
-    System.out.println("Enter new date written (YYYY-MM-DD): ");
+    System.out.println("Enter new date written (YYYY-MM-DD) (enter if there is none): ");
     dateWritten = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter new date published (YYYY-MM-DD): ");
+    System.out.println("Enter new date published (YYYY-MM-DD) (enter if there is none): ");
     datePublished = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter new price: ");
+    System.out.println("Enter new price (use -1 if there is none): ");
     price = s.nextDouble();
     s.nextLine();
     Publication.updateBookEdition(ISBN, edition, editionTitle, dateWritten, datePublished, price);
@@ -137,9 +137,9 @@ public class PublicationUI {
     s.nextLine();
     System.out.println("Enter issue title: ");
     issueTitle = s.nextLine();
-    System.out.println("Enter publication date (YYYY-MM-DD): ");
+    System.out.println("Enter publication date (YYYY-MM-DD) (enter if there is none): ");
     pubDate = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter price: ");
+    System.out.println("Enter price (use -1 if there is none): ");
     price = s.nextDouble();
     s.nextLine();
     Publication.addIssue(pubID, issueTitle, pubDate, price);
@@ -153,9 +153,9 @@ public class PublicationUI {
     s.nextLine();
     System.out.println("Enter issue title: ");
     issueTitle = s.nextLine();
-    System.out.println("Enter new publication date (YYYY-MM-DD): ");
+    System.out.println("Enter new publication date (YYYY-MM-DD) (enter if there is none): ");
     pubDate = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter new price: ");
+    System.out.println("Enter new price (use -1 if there is none): ");
     price = s.nextDouble();
     s.nextLine();
     Publication.editIssue(pubID, issueTitle, pubDate, price);
@@ -193,11 +193,11 @@ public class PublicationUI {
       s.nextLine();
       System.out.println("Enter chapter title: ");
       chapterTitle = s.nextLine();
-      System.out.println("Enter new date (YYYY-MM-DD): ");
+      System.out.println("Enter new date (YYYY-MM-DD) (enter if there is none): ");
       date = java.sql.Date.valueOf(s.nextLine());
-      System.out.println("Enter new text: ");
+      System.out.println("Enter new text (enter if there is none): ");
       text = s.nextLine();
-      System.out.println("Enter new topic: ");
+      System.out.println("Enter new topic (enter if there is none): ");
       topic = s.nextLine();
       Publication.editChapter(ISBN, chapterTitle, date, text, topic);
     
@@ -236,11 +236,11 @@ public class PublicationUI {
     issueTitle = s.nextLine();  
     System.out.println("Enter article title: ");
     articleTitle = s.nextLine();
-    System.out.println("Enter new date written (YYYY-MM-DD): ");
+    System.out.println("Enter new date written (YYYY-MM-DD) (enter if there is none): ");
     dateWritten = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter new text: ");
+    System.out.println("Enter new text (enter if there is none): ");
     text = s.nextLine();
-    System.out.println("Enter new topic: ");
+    System.out.println("Enter new topic (enter if there is none): ");
     topic = s.nextLine();
     Publication.editArticle(pubID, issueTitle, articleTitle, dateWritten, text, topic);
     
