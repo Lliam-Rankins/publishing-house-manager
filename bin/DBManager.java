@@ -44,7 +44,7 @@ public class DBManager {
         try {
             statement.execute(sql);
         } catch (SQLException e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -55,7 +55,7 @@ public class DBManager {
             result = statement.executeQuery(sql);
             return result;
         } catch (SQLException e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }
@@ -64,17 +64,17 @@ public class DBManager {
         try {
             statement.executeUpdate(sql);
         } catch (SQLException e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return false;
         }
         return true;
     }
 
     // For queries where we want to know how many rows affected
-    public static int executeUpdateCount(String query) {
+    public static int executeUpdateCount(String query){
         try {
             return statement.executeUpdate(query);
-        } catch (SQLException e) {
+        } catch(SQLException e){
             return -1;
         }
     }
@@ -178,6 +178,7 @@ public class DBManager {
             e.printStackTrace();
         }
     }
+
 
     public static void rollbackTransaction() {
         try {
