@@ -58,7 +58,6 @@ public class DistributorUI {
 
         try {
             distributor.deleteDistributor(distribID);
-            System.out.println("Distributor deleted successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -66,7 +65,7 @@ public class DistributorUI {
 
     public static void handleInputOrder(Scanner s, Distributor distributor) {
 
-        System.out.println("Is this order for bookEdition or Issue?: ");
+        System.out.println("Is this order for bookEdition or issue?: ");
         String distribID = s.nextLine();
         switch (distribID) {
             case "bookEdition": {
@@ -78,8 +77,7 @@ public class DistributorUI {
                 String dueBy = s.nextLine();
                 System.out.println("Shipping cost (or Enter to skip): ");
                 String shippingInput = s.nextLine();
-                Float shippingCost =
-                        shippingInput.isEmpty() ? null : Float.parseFloat(shippingInput);
+                Float shippingCost = shippingInput.isEmpty() ? null : Float.parseFloat(shippingInput);
                 System.out.println("Date placed (YYYY-MM-DD): ");
                 String datePlaced = s.nextLine();
                 System.out.println("Delivery status: ");
@@ -108,8 +106,7 @@ public class DistributorUI {
                 String dueBy = s.nextLine();
                 System.out.println("Shipping cost (or Enter to skip): ");
                 String shippingInput = s.nextLine();
-                Float shippingCost =
-                        shippingInput.isEmpty() ? null : Float.parseFloat(shippingInput);
+                Float shippingCost = shippingInput.isEmpty() ? null : Float.parseFloat(shippingInput);
                 System.out.println("Date placed (YYYY-MM-DD): ");
                 String datePlaced = s.nextLine();
                 System.out.println("Delivery status: ");
@@ -142,7 +139,6 @@ public class DistributorUI {
         String paymentStatus = s.nextLine();
         try {
             distributor.billDistributor(oID, distribID, paymentStatus);
-            System.out.println(GREEN + "Status of order changed" + RESET);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -151,27 +147,25 @@ public class DistributorUI {
     public static void handleReceivePayment(Scanner s, Distributor distributor) {
         System.out.print("Enter Distributor ID: ");
         int distribID = Integer.parseInt(s.nextLine());
-        
+
         boolean hasOrders = Distributor.listUnpaidOrders(distribID);
-        
+
         if (!hasOrders) {
             System.out.println("No unpaid orders found for this distributor.");
             return;
         }
-        
+
         System.out.print("Enter the ID of the order you want to pay: ");
         int oID = Integer.parseInt(s.nextLine());
-        
+
         boolean success = distributor.receivePayment(oID, distribID);
-        
+
         if (success) {
             System.out.println("Payment received successfully!");
         } else {
             System.out.println("Payment failed. Please check the order ID.");
         }
     }
-
-
 
     public static void handleIdentifyMismatchedDistributors(Scanner s, Distributor distributor) {
         try {
@@ -194,4 +188,3 @@ public class DistributorUI {
         }
     }
 }
-
