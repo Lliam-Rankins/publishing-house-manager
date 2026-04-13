@@ -322,23 +322,24 @@ public class Main {
                         System.out.println("listDistributors");
                         System.out.println("");
 
-                        // Report Operations
-                        System.out.println("-----Report Operations-----");
-                        System.out.println("countDistributors");
-                        System.out.println("countOrdersByDistributor");
-                        System.out.println("countIssuesByDistributor");
-                        System.out.println("costPerIssuePerDistributor");
-                        System.out.println("costPerEditionPerDistributor");
-                        System.out.println("countPublicationsPerDistributorPerWeek");
-                        System.out.println("countPublicationsPerDistributorPerMonth");
-                        System.out.println("totalCostPerDistributorPerWeek");
-                        System.out.println("totalCostPerDistributorPerMonth");
-                        System.out.println("totalRevenuePerCity");
-                        System.out.println("totalRevenuePerDistributor");
-                        System.out.println("totalExpenses");
-                        System.out.println("");
-                        break;
-                    }
+                    // Report Operations
+                    System.out.println("-----Report Operations-----");
+                    System.out.println("countDistributors");
+                    System.out.println("countOrdersByDistributor");
+                    System.out.println("countIssuesByDistributor");
+                    System.out.println("costPerIssuePerDistributor");
+                    System.out.println("costPerEditionPerDistributor");
+                    System.out.println("countPublicationsPerDistributorPerWeek");
+                    System.out.println("countPublicationsPerDistributorPerMonth");
+                    System.out.println("totalCostPerDistributorPerWeek");
+                    System.out.println("totalCostPerDistributorPerMonth");
+                    System.out.println("totalRevenuePerCity");
+                    System.out.println("totalRevenuePerDistributor");
+                    System.out.println("totalExpenses");
+                    System.out.println("totalRevenue");
+                    System.out.println("");
+                    break;
+                }
 
                     // Exit Case
                     case "exit":
