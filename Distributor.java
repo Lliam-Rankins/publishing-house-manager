@@ -11,8 +11,7 @@ public class Distributor{
 
     public Distributor(Connection connection){
         this.connection = connection;
-
-        
+  
     }
     /**
      * Adds a new distributor to the database.
@@ -30,10 +29,12 @@ public class Distributor{
      * @throws SQLException if a database access error occurs
      */
     public boolean addDistributor(int distribID, float balance, String contactName, String phoneNumber, String category, String name, String street, String city, String state) throws SQLException {
+        DBManager.beginTransaction();
         String sql = "INSERT INTO Distributor VALUES(%d, %f, '%s', '%s', '%s', '%s', '%s', '%s', '%s') ";
         sql = String.format(java.util.Locale.US,sql,distribID,balance,contactName,phoneNumber,category,name, street, city, state);
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't add this distributor");
+            DBManager.rollbackTransaction();
             return false;
         }
         DBManager.commitTransaction();
@@ -50,11 +51,18 @@ public class Distributor{
      * 
      */
     public void updateDistributor(String field, String value, int distribID) throws SQLException {
+        DBManager.beginTransaction();
         String sql = "UPDATE Distributor SET " + field + " = ? WHERE distribID = ?";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setString(1, value);
         pstmt.setInt(2, distribID);
-        pstmt.executeUpdate();
+        int rows = pstmt.executeUpdate();
+        if (rows == 0) {
+            System.out.println(RED + "No distributor found with ID " + distribID + RESET);
+            DBManager.rollbackTransaction();
+        } else {
+            DBManager.commitTransaction();
+        }
         pstmt.close();
     }
 
@@ -67,6 +75,7 @@ public class Distributor{
      */
 
     public void deleteDistributor(int distribID) throws SQLException {
+        DBManager.beginTransaction();
         String sql = "DELETE FROM Distributor WHERE distribID = ?; ";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, distribID);
@@ -77,6 +86,7 @@ public class Distributor{
         } else {
             System.out.println(GREEN+ "Distributor deleted successfully."+ RESET);
         }
+        DBManager.commitTransaction();
     }
 
     /**
@@ -97,7 +107,7 @@ public class Distributor{
     public boolean inputOrderISBN(int oID, long ISBN, String dueBy, Float shippingCost,
                                 String datePlaced, String deliveryStatus,
                                 String paymentStatus, int copies) throws SQLException {
-
+        DBManager.beginTransaction();
         String sql = String.format(
             "INSERT INTO `Order` VALUES(%d, '%s', %f, '%s', '%s', '%s', %d)",
             oID, dueBy, shippingCost, datePlaced, deliveryStatus, paymentStatus, copies
@@ -105,6 +115,7 @@ public class Distributor{
 
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't insert order");
+            DBManager.rollbackTransaction();
             return false;
         }
 
@@ -115,8 +126,11 @@ public class Distributor{
 
         if (!DBManager.executeUpdate(sql2)) {
             System.out.println("Couldn't insert ISBN relation");
+            DBManager.rollbackTransaction();
             return false;
         }
+
+        DBManager.commitTransaction();
 
         return true;
     }
@@ -141,7 +155,7 @@ public class Distributor{
                                 String dueBy, Float shippingCost,
                                 String datePlaced, String deliveryStatus,
                                 String paymentStatus, int copies) throws SQLException {
-
+        DBManager.beginTransaction();                        
         String sql = String.format(
             "INSERT INTO `Order` VALUES(%d, '%s', %f, '%s', '%s', '%s', %d)",
             oID, dueBy, shippingCost, datePlaced, deliveryStatus, paymentStatus, copies
@@ -149,6 +163,7 @@ public class Distributor{
 
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't insert order");
+            DBManager.rollbackTransaction();
             return false;
         }
 
@@ -159,8 +174,11 @@ public class Distributor{
 
         if (!DBManager.executeUpdate(sql2)) {
             System.out.println("Couldn't insert issue relation");
+            DBManager.rollbackTransaction();
             return false;
         }
+
+        DBManager.commitTransaction();
 
         return true;
     }
@@ -175,13 +193,14 @@ public class Distributor{
      */
     //Bill distributor for an order. 
     public boolean billDistributor(int oID, int distribID, String paymentStatus) throws SQLException {
-
+        DBManager.beginTransaction();
         String sql = String.format(
             "INSERT INTO PlacedBy VALUES(%d, %d)",
             distribID, oID
         );
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't link distributor and order");
+            DBManager.rollbackTransaction();
             return false;
         }
         String sql2 = String.format(
@@ -190,64 +209,94 @@ public class Distributor{
         );
         if (!DBManager.executeUpdate(sql2)) {
             System.out.println("Couldn't update payment status");
+            DBManager.rollbackTransaction();
             return false;
         }
+        DBManager.commitTransaction();
         return true;
     }
 
-    //Receive a payment and change the outstanding balance of a distributor. }
-    /**
+ /**
      * Receive a payment and change the outstanding balance of a distributor.
      * @param distribID     unique identifier of a distributor
-     * @param newBalance    new balance of a distributor
      * @return
      * @throws SQLException
      */
     public boolean receivePayment(int oID, int distribID) {
-
-        //Update order payment status
+        DBManager.beginTransaction();
+        
         String sql = String.format(
             "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = %d",
-            "Payed", oID  
+            "Paid", oID  
         );
         
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("It is not possible to pay this order");
+            DBManager.rollbackTransaction();
             return false;
         }
         
-        //Get current distributor balance
         String sql2 = String.format(
             "SELECT balance FROM Distributor WHERE distribID = %d", 
             distribID
         );
         ResultSet rs = DBManager.executeQuery(sql2);
         float balance = 0.0f;
-        
+        float orderTotal = 0.0f;
+
         try {
             if (rs.next()) {  
                 balance = rs.getFloat("balance");
             }
+            rs.close();
+
+            String isbnSql = String.format(
+                "SELECT ROUND(o.copies * e.price + o.shippingCost, 2) AS orderTotal " +
+                "FROM `Order` o JOIN ContainsISBN ci ON o.oID = ci.oID " +
+                "JOIN Edition e ON ci.ISBN = e.ISBN WHERE o.oID = %d", oID
+            );
+            ResultSet rsIsbn = DBManager.executeQuery(isbnSql);
+            if (rsIsbn.next() && rsIsbn.getObject("orderTotal") != null) {
+                orderTotal = rsIsbn.getFloat("orderTotal");
+            }
+            rsIsbn.close();
+
+            if (orderTotal == 0.0f) {
+                String issueSql = String.format(
+                    "SELECT COALESCE(SUM(o.copies * i.price), 0) + o.shippingCost AS orderTotal " +
+                    "FROM `Order` o JOIN ContainsIssue ci ON o.oID = ci.oID " +
+                    "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
+                    "WHERE o.oID = %d GROUP BY o.oID", oID
+                );
+                ResultSet rsIssue = DBManager.executeQuery(issueSql);
+                if (rsIssue.next() && rsIssue.getObject("orderTotal") != null) {
+                    orderTotal = rsIssue.getFloat("orderTotal");
+                }
+                rsIssue.close();
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
+            DBManager.rollbackTransaction();
             return false;
         }
-        
-        // Get order total 
-        float orderTotal = getOrderTotal(oID); 
-        
-        // Update distributor balance 
+
         float newBalance = balance - orderTotal;
-        
-        String sql3 = String.format(
+
+  
+        String sql3 = String.format(java.util.Locale.US,
             "UPDATE Distributor SET balance = %f WHERE distribID = %d",  
             newBalance, distribID
         );
+
         
         if (!DBManager.executeUpdate(sql3)) {
             System.out.println("Failed to update distributor balance");
+            DBManager.rollbackTransaction();
             return false;
         }
+
+        DBManager.commitTransaction();
         
         System.out.println("Payment received. New balance: $" + newBalance);
         return true;
@@ -293,7 +342,11 @@ public class Distributor{
         return 0.0f;
     }
 
-
+    /**
+     * 
+     * @param distribID
+     * @return
+     */
     public static boolean listUnpaidOrders(int distribID) {
         String query =
                 "SELECT o.oID, o.datePlaced, o.dueBy, o.shippingCost, o.copies, " +
@@ -342,25 +395,13 @@ public class Distributor{
             return false;
         }
     }
-    public boolean receivePayment(int distribID, float newBalance) throws SQLException {
-
-        String sql = String.format(
-            "UPDATE Distributor SET balance = %f WHERE distribID = %d",
-            newBalance, distribID
-        );
-        if (!DBManager.executeUpdate(sql)) {
-            System.out.println("Couldn't update balance");
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Identify distributors whose total billed amount does not match the sum of their recorded payments. 
      * @throws SQLException
      */
     public void identifyMismatchedDistributors() throws SQLException {
-
+        
         String sql =
             "SELECT CombinedResults.distribID, CombinedResults.name, CombinedResults.balance, " +
                     "SUM(SubBalance) as CalculatedBalance " +
