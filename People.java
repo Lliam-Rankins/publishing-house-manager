@@ -1,6 +1,9 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Class for performing the project operations related to people
+ */
 public class People {
     public static boolean assignEditorToPublication(int editorId, int pubId, boolean invited) {
         String query = "INSERT INTO Edits VALUES (%d, %d, %b)";
@@ -30,21 +33,30 @@ public class People {
             String workType, String dateClaimed, int personId) {
         DBManager.beginTransaction();
 
-        String query1 = "INSERT INTO Payment VALUES (%d, %f, '%s', '%s', '%s')";
+        String query1 = "INSERT INTO Payment VALUES (%d, %f, '%s', '%s', %s)";
         String query2 = "INSERT INTO Receives VALUES (%d, %d)";
+
+        // Handle null values for parameters
+        if (dateClaimed == null) {
+            dateClaimed = "NULL";
+        } else {
+            dateClaimed = "'" + dateClaimed + "'";
+        }
         query1 = String.format(query1, paymentId, amount, dateIssued, workType, dateClaimed);
         query2 = String.format(query2, personId, paymentId);
 
-        if (!DBManager.executeUpdate(query1)) {
+        if (!DBManager.executeUpdate(query1)) { // If we fail to add the payment to the Payments
+                                                // table
             System.out.println("Couldn't add payment to database");
             DBManager.rollbackTransaction();
             return false;
-        } else if (!DBManager.executeUpdate(query2)) {
+        } else if (!DBManager.executeUpdate(query2)) { // If we fail to add the payment to the
+                                                       // Receives table
             System.out.println("Couldn't add entry to Receives table");
             DBManager.rollbackTransaction();
             return false;
         }
-        DBManager.commitTransaction();
+        DBManager.commitTransaction(); // Commit the transaction if all operations are successful
 
         return true;
     }
@@ -54,7 +66,6 @@ public class People {
 
         String query = "UPDATE Payment SET dateClaimed = '%s' WHERE paymentID = %d";
         query = String.format(query, dateClaimed, paymentId);
-
         if (!DBManager.executeUpdate(query)) {
             System.out.println("Couldn't update payment claim date in database");
             DBManager.rollbackTransaction();
