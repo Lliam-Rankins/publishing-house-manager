@@ -34,9 +34,20 @@ public class Distributor {
     public boolean addDistributor(int distribID, float balance, String contactName, String phoneNumber, String category,
             String name, String street, String city, String state) throws SQLException {
         DBManager.beginTransaction();
-        String sql = "INSERT INTO Distributor VALUES(%d, %f, '%s', '%s', '%s', '%s', '%s', '%s', '%s') ";
-        sql = String.format(java.util.Locale.US, sql, distribID, balance, contactName, phoneNumber, category, name,
-                street, city, state);
+        // only add null if there is no a value
+        String phoneVal = (phoneNumber == null || phoneNumber.trim().isEmpty()) ? "NULL"
+                : "'" + phoneNumber.trim() + "'";
+        String catVal = (category == null || category.trim().isEmpty()) ? "NULL" : "'" + category.trim() + "'";
+        String nameVal = (name == null || name.trim().isEmpty()) ? "NULL" : "'" + name.trim() + "'";
+        // always add quotes
+        String contactVal = "'" + contactName.trim() + "'";
+        String streetVal = "'" + street.trim() + "'";
+        String cityVal = "'" + city.trim() + "'";
+        String stateVal = "'" + state.trim() + "'";
+        String sql = String.format(java.util.Locale.US,
+                "INSERT INTO Distributor VALUES(%d, %f, %s, %s, %s, %s, %s, %s, %s)",
+                distribID, balance, contactVal, phoneVal, catVal, nameVal, streetVal, cityVal, stateVal);
+
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't add this distributor");
             DBManager.rollbackTransaction();
@@ -116,9 +127,16 @@ public class Distributor {
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
-        String sql = String.format(
-                "INSERT INTO `Order` VALUES(%d, '%s', %f, '%s', '%s', '%s', %d)",
-                oID, dueBy, shippingCost, datePlaced, deliveryStatus, paymentStatus, copies);
+
+        // Handle NULL values for optional fields
+        String dueByVal = (dueBy == null || dueBy.trim().isEmpty()) ? "NULL" : "'" + dueBy.trim() + "'";
+        String shippingCostVal = (shippingCost == null) ? "NULL"
+                : String.format(java.util.Locale.US, "%f", shippingCost);
+
+        String sql = String.format(java.util.Locale.US,
+                "INSERT INTO `Order` VALUES(%d, %s, %s, '%s', '%s', '%s', %d)",
+                oID, dueByVal, shippingCostVal, datePlaced.trim(),
+                deliveryStatus.trim(), paymentStatus.trim(), copies);
 
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't insert order");
@@ -137,7 +155,6 @@ public class Distributor {
         }
 
         DBManager.commitTransaction();
-
         return true;
     }
 
@@ -166,9 +183,16 @@ public class Distributor {
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
+
+        // Handle NULL values for optional fields
+        String dueByVal = (dueBy == null || dueBy.trim().isEmpty()) ? "NULL" : "'" + dueBy.trim() + "'";
+        String shippingCostVal = (shippingCost == null) ? "NULL"
+                : String.format(java.util.Locale.US, "%f", shippingCost);
+
         String sql = String.format(java.util.Locale.US,
-                "INSERT INTO `Order` VALUES(%d, '%s', %f, '%s', '%s', '%s', %d)",
-                oID, dueBy, shippingCost, datePlaced, deliveryStatus, paymentStatus, copies);
+                "INSERT INTO `Order` VALUES(%d, %s, %s, '%s', '%s', '%s', %d)",
+                oID, dueByVal, shippingCostVal, datePlaced.trim(),
+                deliveryStatus.trim(), paymentStatus.trim(), copies);
 
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("Couldn't insert order");
@@ -200,7 +224,7 @@ public class Distributor {
      * @throws SQLException
      */
     // Bill distributor for an order.
-    public boolean billDistributor(int oID, int distribID, String paymentStatus) throws SQLException {
+    public boolean billDistributor(int oID, int distribID) throws SQLException {
         DBManager.beginTransaction();
         String sql = String.format(
                 "INSERT INTO PlacedBy VALUES(%d, %d)",
@@ -210,9 +234,7 @@ public class Distributor {
             DBManager.rollbackTransaction();
             return false;
         }
-        String sql2 = String.format(
-                "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = %d",
-                paymentStatus, oID);
+        String sql2 = "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = 'Billed'";
         if (!DBManager.executeUpdate(sql2)) {
             System.out.println("Couldn't update payment status");
             DBManager.rollbackTransaction();

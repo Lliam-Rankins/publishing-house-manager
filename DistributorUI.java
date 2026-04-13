@@ -135,10 +135,8 @@ public class DistributorUI {
         int distribID = Integer.parseInt(s.nextLine());
         System.out.println("Enter the order ID;");
         int oID = Integer.parseInt(s.nextLine());
-        System.out.println("Enter the status of the order: ");
-        String paymentStatus = s.nextLine();
         try {
-            distributor.billDistributor(oID, distribID, paymentStatus);
+            distributor.billDistributor(oID, distribID);
         } catch (SQLException e) {
             e.printStackTrace();
         }
