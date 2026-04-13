@@ -35,8 +35,11 @@ public class PeopleUI {
         String dateIssued = s.nextLine();
         System.out.println("Enter the work type:");
         String workType = s.nextLine();
-        System.out.println("Enter the date the payment was claimed:");
+        System.out.println("Enter the date the payment was claimed (Press Enter for NULL):");
         String dateClaimed = s.nextLine();
+        if (dateClaimed.equalsIgnoreCase("")) {
+            dateClaimed = null;
+        }
 
         System.out.println("Enter the id of the person receiving the payment:");
         int personId = s.nextInt();
