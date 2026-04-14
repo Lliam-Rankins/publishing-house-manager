@@ -4,5 +4,9 @@
   "[java]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "redhat.java"
-  }
+  },
+  "java.project.referencedLibraries": [
+    "lib/**/*.jar",
+    "mariadb-java-client-2.7.13.jar"
+  ]
 }

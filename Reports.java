@@ -1,9 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Scanner;
 
 public class Reports {
     // Class for Reports
@@ -53,7 +48,7 @@ public class Reports {
         try {
             System.out.println("Total orders per distributor");
             while (table.next()) {
-                System.out.println("DistribID: " + table.getString("distribID") + " | Cost: " + table.getInt(2));
+                System.out.println("DistribID: " + table.getString("distribID") + " | Count: " + table.getInt(2));
             }
 
             return true;
@@ -182,7 +177,7 @@ public class Reports {
         try {
             System.out.println("Total publications per distributor per week");
             while (table.next()) {
-                System.out.println("DistribID: " + table.getString("distribID") + ", Week: " + table.getInt("month")
+                System.out.println("DistribID: " + table.getString("distribID") + ", Week: " + table.getInt("week")
                         + " | Total Publications: " + table.getInt("totalCopies"));
             }
 
@@ -223,7 +218,7 @@ public class Reports {
     // Calculate total cost per distributor per week
     public static boolean totalCostPerDistributorPerWeek() {
         // SQL Query
-        String query = "SELECT distribID, week, SUM(totalPrice) AS totalPrice FROM (SELECT distribID, WEEK(datePlaced) AS week, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, MONTH(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced)) AS combined GROUP BY distribID, week  HAVING totalPrice IS NOT NULL;";
+        String query = "SELECT distribID, week, SUM(totalPrice) AS totalPrice FROM (SELECT distribID, WEEK(datePlaced) AS week, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced)) AS combined GROUP BY distribID, week  HAVING totalPrice IS NOT NULL;";
 
         ResultSet table = DBManager.executeQuery(query);
 
@@ -327,7 +322,7 @@ public class Reports {
     // Calculate total expenses (Shipping Cost)
     public static boolean totalExpenses() {
         // SQL Query
-        String query = "SELECT SUM(shippingCost) FROM `Order`;";
+        String query = "SELECT SUM(cost) FROM (SELECT shippingCost as cost FROM `Order` UNION ALL SELECT amount as cost FROM Payment) as costTable;";
 
         ResultSet table = DBManager.executeQuery(query);
 
