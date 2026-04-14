@@ -66,11 +66,13 @@ public class DistributorUI {
     public static void handleInputOrder(Scanner s, Distributor distributor) {
 
         System.out.println("Is this order for bookEdition or issue?: ");
-        String distribID = s.nextLine();
-        switch (distribID) {
+        String pubType = s.nextLine();
+        System.out.println("Enter the ID of the distributor that is placing the order: ");
+        int distribID = Integer.parseInt(s.nextLine());
+        System.out.println("Enter order ID: ");
+        int oID = Integer.parseInt(s.nextLine());
+        switch (pubType) {
             case "bookEdition": {
-                System.out.println("Enter order ID: ");
-                int oID = Integer.parseInt(s.nextLine());
                 System.out.println("Enter order ISBN: ");
                 long ISBN = Long.parseLong(s.nextLine());
                 System.out.println("Due by (YYYY-MM-DD, or Enter to skip): ");
@@ -87,17 +89,20 @@ public class DistributorUI {
                 System.out.println("Copies: ");
                 int copies = Integer.parseInt(s.nextLine());
                 try {
-                    distributor.inputOrderISBN(oID, ISBN, dueBy, shippingCost, datePlaced,
+                    boolean success = distributor.inputOrderISBN(distribID, oID, ISBN, dueBy, shippingCost, datePlaced,
                             deliveryStatus, paymentStatus, copies);
-                    System.out.println("Order added successfully.");
+                    if (success) {
+                        System.out.println(GREEN + "Order added successfully." + RESET);
+                    } else {
+                        System.out.println(GREEN + "This is not possible" + RESET);
+                    }
+
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 break;
             }
             case "issue": {
-                System.out.println("Enter order ID: ");
-                int oID = Integer.parseInt(s.nextLine());
                 System.out.println("Enter order publication ID: ");
                 int pubID = Integer.parseInt(s.nextLine());
                 System.out.println("Enter issue Title: ");
@@ -116,7 +121,7 @@ public class DistributorUI {
                 System.out.println("Copies: ");
                 int copies = Integer.parseInt(s.nextLine());
                 try {
-                    distributor.inputOrderIssue(oID, pubID, issueTitle, dueBy, shippingCost,
+                    distributor.inputOrderIssue(distribID, oID, pubID, issueTitle, dueBy, shippingCost,
                             datePlaced, deliveryStatus, paymentStatus, copies);
                     System.out.println("Order added successfully.");
                 } catch (SQLException e) {
@@ -136,10 +141,17 @@ public class DistributorUI {
         System.out.println("Enter the order ID;");
         int oID = Integer.parseInt(s.nextLine());
         try {
-            distributor.billDistributor(oID, distribID);
+            boolean success = distributor.billDistributor(oID, distribID);
+            if (success){
+                System.out.println(GREEN +"Distributor billed successfully!"+RESET);
+            }
+            else{
+                System.out.println("Billed failed. Please check the order ID.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
     }
 
     public static void handleReceivePayment(Scanner s, Distributor distributor) {

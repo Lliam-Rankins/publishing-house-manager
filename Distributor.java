@@ -39,7 +39,7 @@ public class Distributor {
                 : "'" + phoneNumber.trim() + "'";
         String catVal = (category == null || category.trim().isEmpty()) ? "NULL" : "'" + category.trim() + "'";
         String nameVal = (name == null || name.trim().isEmpty()) ? "NULL" : "'" + name.trim() + "'";
-        // always add quotes
+        // always add quotes to NOT NULL values
         String contactVal = "'" + contactName.trim() + "'";
         String streetVal = "'" + street.trim() + "'";
         String cityVal = "'" + city.trim() + "'";
@@ -49,7 +49,7 @@ public class Distributor {
                 distribID, balance, contactVal, phoneVal, catVal, nameVal, streetVal, cityVal, stateVal);
 
         if (!DBManager.executeUpdate(sql)) {
-            System.out.println("Couldn't add this distributor");
+            System.out.println(RED + "Couldn't add this distributor" + RESET);
             DBManager.rollbackTransaction();
             return false;
         }
@@ -123,7 +123,7 @@ public class Distributor {
      * @throws SQLException
      */
 
-    public boolean inputOrderISBN(int oID, long ISBN, String dueBy, Float shippingCost,
+    public boolean inputOrderISBN(int distribID, int oID, long ISBN, String dueBy, Float shippingCost,
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
@@ -139,17 +139,27 @@ public class Distributor {
                 deliveryStatus.trim(), paymentStatus.trim(), copies);
 
         if (!DBManager.executeUpdate(sql)) {
-            System.out.println("Couldn't insert order");
+            System.out.println(RED + "Couldn't insert order" + RESET);
             DBManager.rollbackTransaction();
             return false;
         }
-
+        // Which publication (issue) is related to this orders
         String sql2 = String.format(
                 "INSERT INTO ContainsISBN VALUES(%d, %d)",
                 oID, ISBN);
 
         if (!DBManager.executeUpdate(sql2)) {
-            System.out.println("Couldn't insert ISBN relation");
+            System.out.println(RED + "Couldn't insert ISBN relation" + RESET);
+            DBManager.rollbackTransaction();
+            return false;
+        }
+
+        // Who placed the order
+
+        String sql3 = String.format("INSERT INTO PlacedBy VALUES (%d, %d)", distribID, oID);
+
+        if (!DBManager.executeUpdate(sql3)) {
+            System.out.println(RED + "Couldn't add this order");
             DBManager.rollbackTransaction();
             return false;
         }
@@ -178,7 +188,7 @@ public class Distributor {
      * @throws SQLException
      */
 
-    public boolean inputOrderIssue(int oID, int pubID, String issueTitle,
+    public boolean inputOrderIssue(int distribID, int oID, int pubID, String issueTitle,
             String dueBy, Float shippingCost,
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
@@ -195,7 +205,7 @@ public class Distributor {
                 deliveryStatus.trim(), paymentStatus.trim(), copies);
 
         if (!DBManager.executeUpdate(sql)) {
-            System.out.println("Couldn't insert order");
+            System.out.println(RED + "Couldn't insert order" + RESET);
             DBManager.rollbackTransaction();
             return false;
         }
@@ -205,7 +215,16 @@ public class Distributor {
                 oID, pubID, issueTitle.trim().replace("'", "''"));
 
         if (!DBManager.executeUpdate(sql2)) {
-            System.out.println("Couldn't insert issue relation");
+            System.out.println(RED + "Couldn't insert issue relation" + RESET);
+            DBManager.rollbackTransaction();
+            return false;
+        }
+
+        // Who placed the order
+
+        String sql3 = String.format("INSERT INTO PlacedBy VALUES (%d, %d)", distribID, oID);
+        if (!DBManager.executeUpdate(sql3)) {
+            System.out.println(RED + "Couldn't add this order");
             DBManager.rollbackTransaction();
             return false;
         }
@@ -225,23 +244,51 @@ public class Distributor {
      */
     // Bill distributor for an order.
     public boolean billDistributor(int oID, int distribID) throws SQLException {
-        DBManager.beginTransaction();
-        String sql = String.format(
-                "INSERT INTO PlacedBy VALUES(%d, %d)",
-                distribID, oID);
-        if (!DBManager.executeUpdate(sql)) {
-            System.out.println("Couldn't link distributor and order");
-            DBManager.rollbackTransaction();
-            return false;
+        if (!checkPlacedBy(oID, distribID)) {
+            // if false not execute
+            return false; 
         }
-        String sql2 = "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = 'Billed'";
+        DBManager.beginTransaction();
+        String sql2 = String.format(
+                "UPDATE `Order` SET paymentStatus = 'Billed' WHERE oID = %d",
+                oID);
         if (!DBManager.executeUpdate(sql2)) {
-            System.out.println("Couldn't update payment status");
+            System.out.println(RED + "Couldn't update payment status" + RESET);
             DBManager.rollbackTransaction();
             return false;
         }
         DBManager.commitTransaction();
         return true;
+    }
+
+    public boolean checkPlacedBy(int oID, int distribID) throws SQLException {
+        String sql = "SELECT o.paymentStatus FROM `Order` o " +
+                     "JOIN PlacedBy p ON o.oID = p.oID " +
+                     "WHERE o.oID = ? AND p.distribID = ?";
+                     
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, oID);
+        pstmt.setInt(2, distribID);
+        ResultSet rs = pstmt.executeQuery();
+
+        boolean isValid = false;
+
+        if (rs.next()) {
+            String status = rs.getString("paymentStatus");
+            // CHECK IF PAYED OR ALREADY BILLES
+            if ("Paid".equalsIgnoreCase(status) || "Billed".equalsIgnoreCase(status)) {
+                System.out.println("Error: The order is already " + status + ".");
+            } else {
+                isValid = true; // It is of the distributor and we can bill it
+            }
+        } else {
+            // If the result is empty is because this order is not associated with the distributor
+            System.out.println("Error: Order ID " + oID + " does not belong to Distributor ID " + distribID + " or does not exist.");
+        }
+
+        rs.close();
+        pstmt.close();
+        return isValid;
     }
 
     /**
