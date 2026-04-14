@@ -36,14 +36,16 @@ public class Distributor {
         DBManager.beginTransaction();
         // only add null if there is no a value
         String phoneVal = (phoneNumber == null || phoneNumber.trim().isEmpty()) ? "NULL"
-                : "'" + phoneNumber.trim() + "'";
-        String catVal = (category == null || category.trim().isEmpty()) ? "NULL" : "'" + category.trim() + "'";
-        String nameVal = (name == null || name.trim().isEmpty()) ? "NULL" : "'" + name.trim() + "'";
+            : "'" + phoneNumber.trim().replace("'", "''") + "'";
+        String catVal = (category == null || category.trim().isEmpty()) ? "NULL" 
+                : "'" + category.trim().replace("'", "''") + "'";
+        String nameVal = (name == null || name.trim().isEmpty()) ? "NULL" 
+                : "'" + name.trim().replace("'", "''") + "'";
         // always add quotes to NOT NULL values
-        String contactVal = "'" + contactName.trim() + "'";
-        String streetVal = "'" + street.trim() + "'";
-        String cityVal = "'" + city.trim() + "'";
-        String stateVal = "'" + state.trim() + "'";
+        String contactVal = "'" + contactName.trim().replace("'", "''") + "'";
+        String streetVal = "'" + street.trim().replace("'", "''") + "'";
+        String cityVal = "'" + city.trim().replace("'", "''") + "'";
+        String stateVal = "'" + state.trim().replace("'", "''") + "'";
         String sql = String.format(java.util.Locale.US,
                 "INSERT INTO Distributor VALUES(%d, %f, %s, %s, %s, %s, %s, %s, %s)",
                 distribID, balance, contactVal, phoneVal, catVal, nameVal, streetVal, cityVal, stateVal);
@@ -79,6 +81,7 @@ public class Distributor {
             DBManager.rollbackTransaction();
         } else {
             DBManager.commitTransaction();
+            System.out.println(GREEN+ "Change made Successfully!"+ RESET);
         }
         pstmt.close();
     }
@@ -127,6 +130,11 @@ public class Distributor {
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
+
+        if (copies <= 0 || (shippingCost != null && shippingCost < 0)){
+            System.out.println(RED + "Not valid values for copies or shipping cost"+ RESET);
+            return false;
+        }
 
         // Handle NULL values for optional fields
         String dueByVal = (dueBy == null || dueBy.trim().isEmpty()) ? "NULL" : "'" + dueBy.trim() + "'";
@@ -194,6 +202,10 @@ public class Distributor {
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
 
+        if (copies <= 0 || (shippingCost != null && shippingCost < 0)){
+            System.out.println(RED + "Not valid values for copies or shipping cost"+ RESET);
+            return false;
+        }
         // Handle NULL values for optional fields
         String dueByVal = (dueBy == null || dueBy.trim().isEmpty()) ? "NULL" : "'" + dueBy.trim() + "'";
         String shippingCostVal = (shippingCost == null) ? "NULL"
@@ -261,6 +273,14 @@ public class Distributor {
         return true;
     }
 
+    /**
+     * 
+     * @param oID
+     * @param distribID
+     * @return true if there exist a relation between the order and distributor
+     * @throws SQLException
+     */
+
     public boolean checkPlacedBy(int oID, int distribID) throws SQLException {
         String sql = "SELECT o.paymentStatus FROM `Order` o " +
                      "JOIN PlacedBy p ON o.oID = p.oID " +
@@ -298,26 +318,54 @@ public class Distributor {
      * @return
      * @throws SQLException
      */
-    public boolean receivePayment(int oID, int distribID) {
-        DBManager.beginTransaction();
+    public boolean receivePayment(int oID, int distribID) throws SQLException {
 
+        if (!checkPlacedBy(oID, distribID)) {
+            // if false not execute
+            return false; 
+        }
+
+        DBManager.beginTransaction();
+        // check if the order is not already paid
+        try {
+            String checkStatusSql = String.format("SELECT paymentStatus FROM `Order` WHERE oID = %d", oID);
+            ResultSet rsStatus = DBManager.executeQuery(checkStatusSql);
+            
+            if (rsStatus.next()) {
+                String status = rsStatus.getString("paymentStatus");
+                // Use equalsIgnoreCase to be safe with casing (e.g. "paid", "Paid", "PAID")
+                if (status != null && status.equalsIgnoreCase("Paid")) {
+                    System.out.println("Error: (Order is already Paid).");
+                    rsStatus.close();
+                    DBManager.rollbackTransaction();
+                    return false;
+                }
+            }
+            rsStatus.close();
+        } catch (SQLException e) {
+            System.out.println("Error checking payment status.");
+            e.printStackTrace();
+            DBManager.rollbackTransaction();
+            return false;
+        }
+        //Changing the status
         String sql = String.format(
                 "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = %d",
                 "Paid", oID);
-
+    
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("It is not possible to pay this order");
             DBManager.rollbackTransaction();
             return false;
         }
-
+        // Getting the balance
         String sql2 = String.format(
                 "SELECT balance FROM Distributor WHERE distribID = %d",
                 distribID);
         ResultSet rs = DBManager.executeQuery(sql2);
         float balance = 0.0f;
         float orderTotal = 0.0f;
-
+        //
         try {
             if (rs.next()) {
                 balance = rs.getFloat("balance");
@@ -336,11 +384,14 @@ public class Distributor {
             rsIsbn.close();
 
             if (orderTotal == 0.0f) {
+                //using COALESCE TO PROTECT OPERATIONS FROM NULL
                 String issueSql = String.format(
-                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + o.shippingCost AS orderTotal " +
-                                "FROM `Order` o JOIN ContainsIssue ci ON o.oID = ci.oID " +
-                                "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
-                                "WHERE o.oID = %d GROUP BY o.oID",
+                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + COALESCE(o.shippingCost, 0) AS orderTotal " + // <-- ¡Espacio agregado aquí!
+                        "FROM `Order` o " +
+                        "JOIN ContainsIssue ci ON o.oID = ci.oID " +
+                        "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
+                        "WHERE o.oID = %d " +
+                        "GROUP BY o.oID, o.shippingCost",
                         oID);
                 ResultSet rsIssue = DBManager.executeQuery(issueSql);
                 if (rsIssue.next() && rsIssue.getObject("orderTotal") != null) {
