@@ -1,7 +1,15 @@
 import java.util.Scanner;
 
-//TODO: Null handling
 public class PublicationUI {
+
+  /**
+   * Handles the user input for adding Publication objects.
+   * Also includes handling for invalid types and values enteres by the user,
+   * reprompting
+   * if necessary.
+   * 
+   * @param s the Scanner object for reading user input
+   */
   public static void handleAddPublication(Scanner s) {
     int pubID = 0;
     String title = "";
@@ -16,6 +24,8 @@ public class PublicationUI {
     boolean editionValid = false;
 
     System.out.println("Enter Publication ID (integer): ");
+    // Loop until a valid integer is entered for the publication ID, reprompting if
+    // necessary
     while (!pubIDValid) {
       try {
         pubID = s.nextInt();
@@ -29,6 +39,8 @@ public class PublicationUI {
     System.out.println("Enter title (press enter if there is none): ");
     title = s.nextLine();
     System.out.println("Enter type: ");
+    // Loop until a valid type is entered for the publication, reprompting if
+    // necessary
     while (!typeValid) {
       type = s.nextLine();
       if (type.equalsIgnoreCase("book") || type.equalsIgnoreCase("magazine") || type.equalsIgnoreCase("journal")) {
@@ -39,12 +51,15 @@ public class PublicationUI {
     }
     System.out.println("Enter periodicity (press enter if publication is a book): ");
     pubPeriodicity = s.nextLine();
+    // If periodicity is empty, prompt user to enter an edition
     if (pubPeriodicity.equalsIgnoreCase("")) {
       pubPeriodicity = null;
       System.out.println("Would you like to add this publication as an edition of a book? y/n");
       String response = s.nextLine();
+      // If they would like to add the edition and link, respond with y
       if (response.equalsIgnoreCase("y")) {
         long ISBN = 0;
+        // Loop until a valid ISBN is input
         while (!ISBNValid) {
           System.out.println("Enter ISBN (long integer, 13 digits): ");
           try {
@@ -62,6 +77,7 @@ public class PublicationUI {
         s.nextLine();
         System.out.println("Enter edition number: ");
         int edition = 0;
+        // Loop until a valid edition number is input
         while (!editionValid) {
           try {
             edition = s.nextInt();
@@ -77,12 +93,15 @@ public class PublicationUI {
         System.out.println("Enter date written (YYYY-MM-DD) (enter if there is none): ");
         String dateWrittenStr = s.nextLine();
         java.sql.Date dateWritten = null;
+        // Ensure that date input is a valid date or is an empty string
         while (!dwValid) {
+          // Accept if an empty string
           if (dateWrittenStr.isEmpty()) {
             dateWritten = null;
             dwValid = true;
           } else {
             try {
+              // Check if date valid, if not an exception will be thrown
               dateWritten = java.sql.Date.valueOf(dateWrittenStr);
               dwValid = true;
             } catch (Exception e) {
@@ -95,12 +114,15 @@ public class PublicationUI {
         System.out.println("Enter date published (YYYY-MM-DD) (enter if there is none): ");
         String datePublishedStr = s.nextLine();
         java.sql.Date datePublished = null;
+        // Ensure that date input is a valid date or is an empty string
         while (!dpValid) {
+          // Accept if an empty string
           if (datePublishedStr.isEmpty()) {
             datePublished = null;
             dpValid = true;
           } else {
             try {
+              // Check if date valid, if not an exception will be thrown
               datePublished = java.sql.Date.valueOf(datePublishedStr);
               dpValid = true;
             } catch (Exception e) {
@@ -112,6 +134,7 @@ public class PublicationUI {
         }
         System.out.println("Enter price (use -1 if there is none) : ");
         double price = 0;
+        // Price must be a double or -1, otherwise reprompt the user
         while (!priceValid) {
           try {
             price = s.nextDouble();
@@ -130,17 +153,25 @@ public class PublicationUI {
         }
 
         s.nextLine();
+        // If user wants to add a publication and edition with link
         Publication.addEditionPublication(pubID, title, type, ISBN, edition, editionTitle, dateWritten, datePublished,
             price);
       } else {
+        // If user just wants to add a publication with a null periodicity
         Publication.addPublication(pubID, title, type, pubPeriodicity);
 
       }
     } else {
+      // If a user enters a publication with a non-null periodicity
       Publication.addPublication(pubID, title, type, pubPeriodicity);
     }
   }
 
+  /**
+   * Handles the inputs of updating a publication.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleUpdatePublication(Scanner s) {
 
     int pubID;
@@ -159,6 +190,11 @@ public class PublicationUI {
     Publication.updatePublication(pubID, title, type, pubPeriodicity);
   }
 
+  /**
+   * Handles the inputs of removing a publication.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleRemovePublication(Scanner s) {
     int pubID;
     System.out.println("Enter Publication ID: ");
@@ -167,6 +203,11 @@ public class PublicationUI {
     Publication.removePublication(pubID);
   }
 
+  /**
+   * Handles the inputs of adding an edition to an existing publication.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleAddBookEditionToExistingPub(Scanner s) {
     int pubID;
     long ISBN;
@@ -208,6 +249,11 @@ public class PublicationUI {
     Publication.addBookEditionToExistingPub(pubID, ISBN, edition, editionTitle, dateWritten, datePublished, price);
   }
 
+  /**
+   * Handles the inputs of updating an edition.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleUpdateBookEdition(Scanner s) {
     long ISBN;
     int edition;
@@ -245,6 +291,11 @@ public class PublicationUI {
     Publication.updateBookEdition(ISBN, edition, editionTitle, dateWritten, datePublished, price);
   }
 
+  /**
+   * Handles the inputs of removing an edition and publication.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleRemoveBookEditionAndPublication(Scanner s) {
     int pubID;
     long ISBN;
@@ -257,6 +308,11 @@ public class PublicationUI {
     Publication.removeBookEditionAndPublication(pubID, ISBN);
   }
 
+  /**
+   * Handles the inputs of removing an edition without the publication.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleRemoveBookEditionNotPublication(Scanner s) {
     long ISBN;
     System.out.println("Enter ISBN: ");
@@ -265,6 +321,11 @@ public class PublicationUI {
     Publication.removeBookEditionNotPub(ISBN);
   }
 
+  /**
+   * Handles the inputs of adding an issue.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleAddIssue(Scanner s) {
     int pubID;
     String issueTitle;
@@ -290,6 +351,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of editing an issue.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleEditIssue(Scanner s) {
     int pubID;
     String issueTitle;
@@ -315,6 +381,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of removing an issue.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleRemoveIssue(Scanner s) {
     int pubID;
     String issueTitle;
@@ -327,6 +398,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of adding a chapter.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleAddChapterTOC(Scanner s) {
     long ISBN;
     String chapterTitle;
@@ -339,6 +415,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of editing a chapter.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleEditChapter(Scanner s) {
     long ISBN;
     String chapterTitle;
@@ -366,6 +447,51 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of updating a chapter's author.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleUpdateChapterAuthor(Scanner s) {
+    long ISBN;
+    String chapterTitle;
+    int pID;
+    boolean invited;
+    System.out.println("Enter ISBN: ");
+    ISBN = s.nextLong();
+    s.nextLine();
+    System.out.println("Enter chapter title: ");
+    chapterTitle = s.nextLine();
+    System.out.println("Enter author pID: ");
+    pID = s.nextInt();
+    s.nextLine();
+    System.out.println("Is the author invited? (true/false): ");
+    invited = s.nextBoolean();
+    s.nextLine();
+    Publication.updateChapterAuthor(ISBN, chapterTitle, pID, invited);
+  }
+
+  /**
+   * Handles the inputs of removing a chapter's author.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleRemoveChapterAuthor(Scanner s) {
+    long ISBN;
+    String chapterTitle;
+    System.out.println("Enter ISBN: ");
+    ISBN = s.nextLong();
+    s.nextLine();
+    System.out.println("Enter chapter title: ");
+    chapterTitle = s.nextLine();
+    Publication.removeChapterAuthor(ISBN, chapterTitle);
+  }
+
+  /**
+   * Handles the inputs of removing a chapter.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleRemoveChapterTOC(Scanner s) {
     long ISBN;
     String chapterTitle;
@@ -378,6 +504,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of adding an article.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleAddArticleTOC(Scanner s) {
     int pubID;
     String issueTitle;
@@ -393,6 +524,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of editing an article.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleEditArticle(Scanner s) {
     int pubID;
     String issueTitle;
@@ -423,117 +559,11 @@ public class PublicationUI {
 
   }
 
-  public static void handleRemoveArticleTOC(Scanner s) {
-    long pubID;
-    String issueTitle;
-    String articleTitle;
-    System.out.println("Enter publication ID: ");
-    pubID = s.nextInt();
-    s.nextLine();
-    System.out.println("Enter issue title: ");
-    issueTitle = s.nextLine();
-    System.out.println("Enter article title: ");
-    articleTitle = s.nextLine();
-    Publication.removeArticleTOC(pubID, issueTitle, articleTitle);
-
-  }
-
-  public static void handleFindEditionsByTopic(Scanner s) {
-    String topic;
-    System.out.println("Enter topic: ");
-    topic = s.nextLine();
-    Publication.findEditionsByTopic(topic);
-  }
-
-  public static void handleFindArticlesByTopic(Scanner s) {
-    String topic;
-    System.out.println("Enter topic: ");
-    topic = s.nextLine();
-    Publication.findArticlesByTopic(topic);
-  }
-
-  public static void handleFindEditionsByDateRange(Scanner s) {
-    java.sql.Date startDate;
-    java.sql.Date endDate;
-    System.out.println("Enter start date (YYYY-MM-DD): ");
-    startDate = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter end date (YYYY-MM-DD): ");
-    endDate = java.sql.Date.valueOf(s.nextLine());
-    Publication.findEditionsByDateRange(startDate, endDate);
-  }
-
-  public static void handleFindArticlesByDateRange(Scanner s) {
-    java.sql.Date startDate;
-    java.sql.Date endDate;
-    System.out.println("Enter start date (YYYY-MM-DD): ");
-    startDate = java.sql.Date.valueOf(s.nextLine());
-    System.out.println("Enter end date (YYYY-MM-DD): ");
-    endDate = java.sql.Date.valueOf(s.nextLine());
-    Publication.findArticlesByDateRange(startDate, endDate);
-  }
-
-  public static void handleFindEditionsByAuthor(Scanner s) {
-    String authorName;
-    System.out.println("Enter author name: ");
-    authorName = s.nextLine();
-    Publication.findEditionsByAuthor(authorName);
-  }
-
-  public static void handleFindArticlesByAuthor(Scanner s) {
-    String authorName;
-    System.out.println("Enter author name: ");
-    authorName = s.nextLine();
-    Publication.findArticlesByAuthor(authorName);
-  }
-
-  public static void handleCompareIssueArticles(Scanner s) {
-    int pubID1;
-    String issueTitle1;
-    int pubID2;
-    String issueTitle2;
-    System.out.println("Enter first publication ID: ");
-    pubID1 = s.nextInt();
-    s.nextLine();
-    System.out.println("Enter first issue title: ");
-    issueTitle1 = s.nextLine();
-    System.out.println("Enter second publication ID: ");
-    pubID2 = s.nextInt();
-    s.nextLine();
-    System.out.println("Enter second issue title: ");
-    issueTitle2 = s.nextLine();
-    Publication.compareIssueArticles(pubID1, issueTitle1, pubID2, issueTitle2);
-  }
-
-  public static void handleUpdateChapterAuthor(Scanner s) {
-    long ISBN;
-    String chapterTitle;
-    int pID;
-    boolean invited;
-    System.out.println("Enter ISBN: ");
-    ISBN = s.nextLong();
-    s.nextLine();
-    System.out.println("Enter chapter title: ");
-    chapterTitle = s.nextLine();
-    System.out.println("Enter author pID: ");
-    pID = s.nextInt();
-    s.nextLine();
-    System.out.println("Is the author invited? (true/false): ");
-    invited = s.nextBoolean();
-    s.nextLine();
-    Publication.updateChapterAuthor(ISBN, chapterTitle, pID, invited);
-  }
-
-  public static void handleRemoveChapterAuthor(Scanner s) {
-    long ISBN;
-    String chapterTitle;
-    System.out.println("Enter ISBN: ");
-    ISBN = s.nextLong();
-    s.nextLine();
-    System.out.println("Enter chapter title: ");
-    chapterTitle = s.nextLine();
-    Publication.removeChapterAuthor(ISBN, chapterTitle);
-  }
-
+  /**
+   * Handles the inputs of updating an article's author.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleUpdateArticleAuthor(Scanner s) {
     int pubID;
     String issueTitle;
@@ -557,6 +587,11 @@ public class PublicationUI {
 
   }
 
+  /**
+   * Handles the inputs of removing an article's author.
+   * 
+   * @param s the scanner object reading user input
+   */
   public static void handleRemoveArticleAuthor(Scanner s) {
     int pubID;
     String issueTitle;
@@ -570,4 +605,126 @@ public class PublicationUI {
     articleTitle = s.nextLine();
     Publication.removeArticleAuthor(pubID, issueTitle, articleTitle);
   }
+
+  /**
+   * Handles the inputs of removing an article.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleRemoveArticleTOC(Scanner s) {
+    long pubID;
+    String issueTitle;
+    String articleTitle;
+    System.out.println("Enter publication ID: ");
+    pubID = s.nextInt();
+    s.nextLine();
+    System.out.println("Enter issue title: ");
+    issueTitle = s.nextLine();
+    System.out.println("Enter article title: ");
+    articleTitle = s.nextLine();
+    Publication.removeArticleTOC(pubID, issueTitle, articleTitle);
+
+  }
+
+  /**
+   * Handles the inputs of finding editions by topic.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleFindEditionsByTopic(Scanner s) {
+    String topic;
+    System.out.println("Enter topic: ");
+    topic = s.nextLine();
+    Publication.findEditionsByTopic(topic);
+  }
+
+  /**
+   * Handles the inputs of finding articles by topic.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleFindArticlesByTopic(Scanner s) {
+    String topic;
+    System.out.println("Enter topic: ");
+    topic = s.nextLine();
+    Publication.findArticlesByTopic(topic);
+  }
+
+  /**
+   * Handles the inputs of finding editions by date range.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleFindEditionsByDateRange(Scanner s) {
+    java.sql.Date startDate;
+    java.sql.Date endDate;
+    System.out.println("Enter start date (YYYY-MM-DD): ");
+    startDate = java.sql.Date.valueOf(s.nextLine());
+    System.out.println("Enter end date (YYYY-MM-DD): ");
+    endDate = java.sql.Date.valueOf(s.nextLine());
+    Publication.findEditionsByDateRange(startDate, endDate);
+  }
+
+  /**
+   * Handles the inputs of finding articles by date range.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleFindArticlesByDateRange(Scanner s) {
+    java.sql.Date startDate;
+    java.sql.Date endDate;
+    System.out.println("Enter start date (YYYY-MM-DD): ");
+    startDate = java.sql.Date.valueOf(s.nextLine());
+    System.out.println("Enter end date (YYYY-MM-DD): ");
+    endDate = java.sql.Date.valueOf(s.nextLine());
+    Publication.findArticlesByDateRange(startDate, endDate);
+  }
+
+  /**
+   * Handles the inputs of finding editions by author name.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleFindEditionsByAuthor(Scanner s) {
+    String authorName;
+    System.out.println("Enter author name: ");
+    authorName = s.nextLine();
+    Publication.findEditionsByAuthor(authorName);
+  }
+
+  /**
+   * Handles the inputs of finding articles by author name.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleFindArticlesByAuthor(Scanner s) {
+    String authorName;
+    System.out.println("Enter author name: ");
+    authorName = s.nextLine();
+    Publication.findArticlesByAuthor(authorName);
+  }
+
+  /**
+   * Handles the inputs of finding articles from 2 given issues.
+   * 
+   * @param s the scanner object reading user input
+   */
+  public static void handleCompareIssueArticles(Scanner s) {
+    int pubID1;
+    String issueTitle1;
+    int pubID2;
+    String issueTitle2;
+    System.out.println("Enter first publication ID: ");
+    pubID1 = s.nextInt();
+    s.nextLine();
+    System.out.println("Enter first issue title: ");
+    issueTitle1 = s.nextLine();
+    System.out.println("Enter second publication ID: ");
+    pubID2 = s.nextInt();
+    s.nextLine();
+    System.out.println("Enter second issue title: ");
+    issueTitle2 = s.nextLine();
+    Publication.compareIssueArticles(pubID1, issueTitle1, pubID2, issueTitle2);
+  }
+
 }
