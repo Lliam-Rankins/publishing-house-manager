@@ -1,6 +1,5 @@
 import java.util.Scanner;
 
-//TODO: Null handling
 public class PublicationUI {
 
   /**
