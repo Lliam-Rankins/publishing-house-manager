@@ -17,9 +17,9 @@ public class Main {
                 System.out.println("Enter an operation, or 'exit' to exit: ");
                 String operation = s.nextLine();
                 switch (operation) {
-                    /////////////////////
+                    ////////////////////
                     // People Operations
-                    /////////////////////
+                    ////////////////////
                     case "assignEditorToPublication":
                         peopleUI.handleAssignEditorToPublication();
                         break;
@@ -36,9 +36,9 @@ public class Main {
                         peopleUI.handleListUnclaimedPayments();
                         break;
 
-                    //////////////////////////
+                    /////////////////////////
                     // Distributor Operations
-                    //////////////////////////
+                    /////////////////////////
                     case "addDistributor": {
                         DistributorUI.handleAddDistributor(s, distributor);
                         break;
@@ -82,9 +82,9 @@ public class Main {
                         break;
                     }
 
-                    ////////////////////////
+                    ///////////////////////
                     // Publication Operations
-                    /////////////////////////
+                    ////////////////////////
                     case "addPublication": {
                         PublicationUI.handleAddPublication(s);
                         break;
@@ -195,9 +195,9 @@ public class Main {
                         break;
                     }
 
-                    //////////////////////
+                    /////////////////////
                     // Report Operations
-                    //////////////////////
+                    /////////////////////
                     // Count total number of distributors
                     case "countDistributors": {
                         Reports.countDistributors();
@@ -327,6 +327,7 @@ public class Main {
                         System.out.println("countDistributors");
                         System.out.println("countOrdersByDistributor");
                         System.out.println("countIssuesByDistributor");
+                        System.out.println("countEditionsByDistributor");
                         System.out.println("costPerIssuePerDistributor");
                         System.out.println("costPerEditionPerDistributor");
                         System.out.println("countPublicationsPerDistributorPerWeek");
@@ -336,6 +337,7 @@ public class Main {
                         System.out.println("totalRevenuePerCity");
                         System.out.println("totalRevenuePerDistributor");
                         System.out.println("totalExpenses");
+                        System.out.println("totalRevenue");
                         System.out.println("");
                         break;
                     }

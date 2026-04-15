@@ -1,2 +1,7 @@
 *.class
 .vscode/
+launch.json
+mariadb-java-client-2.7.13.jar
+bin/
+.vscode/settings.json
+.gitignore

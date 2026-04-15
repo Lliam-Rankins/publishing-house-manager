@@ -15,11 +15,11 @@ public class DistributorUI {
         float balance = Float.parseFloat(s.nextLine());
         System.out.println("Enter contact name: ");
         String contactName = s.nextLine();
-        System.out.println("Enter phone number: ");
+        System.out.println("Enter phone number (or enter to Skip): ");
         String phoneNumber = s.nextLine();
-        System.out.println("Enter category: ");
+        System.out.println("Enter category (or enter to Skip): ");
         String category = s.nextLine();
-        System.out.println("Enter name: ");
+        System.out.println("Enter name (or enter to Skip): ");
         String name = s.nextLine();
         System.out.println("Enter street: ");
         String street = s.nextLine();
@@ -28,9 +28,15 @@ public class DistributorUI {
         System.out.println("Enter state: ");
         String state = s.nextLine();
         try {
-            distributor.addDistributor(distribID, balance, contactName, phoneNumber, category, name,
+            boolean success = distributor.addDistributor(distribID, balance, contactName, phoneNumber, category, name,
                     street, city, state);
-            System.out.println(GREEN + "Distributor added successfully." + RESET);
+            if (success){
+                System.out.println(GREEN + "Distributor added successfully." + RESET);
+            }
+            else{
+                System.out.println(RED + "Not Possible, try." + RESET);
+            }
+            
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -46,7 +52,6 @@ public class DistributorUI {
         int distribID = Integer.parseInt(s.nextLine());
         try {
             distributor.updateDistributor(field, value, distribID);
-            System.out.println(GREEN + "Distributor updated successfully." + RESET);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -66,11 +71,13 @@ public class DistributorUI {
     public static void handleInputOrder(Scanner s, Distributor distributor) {
 
         System.out.println("Is this order for bookEdition or issue?: ");
-        String distribID = s.nextLine();
-        switch (distribID) {
+        String pubType = s.nextLine();
+        System.out.println("Enter the ID of the distributor that is placing the order: ");
+        int distribID = Integer.parseInt(s.nextLine());
+        System.out.println("Enter order ID: ");
+        int oID = Integer.parseInt(s.nextLine());
+        switch (pubType) {
             case "bookEdition": {
-                System.out.println("Enter order ID: ");
-                int oID = Integer.parseInt(s.nextLine());
                 System.out.println("Enter order ISBN: ");
                 long ISBN = Long.parseLong(s.nextLine());
                 System.out.println("Due by (YYYY-MM-DD, or Enter to skip): ");
@@ -87,18 +94,21 @@ public class DistributorUI {
                 System.out.println("Copies: ");
                 int copies = Integer.parseInt(s.nextLine());
                 try {
-                    distributor.inputOrderISBN(oID, ISBN, dueBy, shippingCost, datePlaced,
+                    boolean success = distributor.inputOrderISBN(distribID, oID, ISBN, dueBy, shippingCost, datePlaced,
                             deliveryStatus, paymentStatus, copies);
-                    System.out.println("Order added successfully.");
+                    if (success) {
+                        System.out.println(GREEN + "Order added successfully." + RESET);
+                    } else {
+                        System.out.println(RED + "This is not possible" + RESET);
+                    }
+
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 break;
             }
             case "issue": {
-                System.out.println("Enter order ID: ");
-                int oID = Integer.parseInt(s.nextLine());
-                System.out.println("Enter order publication ID: ");
+                System.out.println("Enterpublication ID: ");
                 int pubID = Integer.parseInt(s.nextLine());
                 System.out.println("Enter issue Title: ");
                 String issueTitle = s.nextLine();
@@ -116,9 +126,13 @@ public class DistributorUI {
                 System.out.println("Copies: ");
                 int copies = Integer.parseInt(s.nextLine());
                 try {
-                    distributor.inputOrderIssue(oID, pubID, issueTitle, dueBy, shippingCost,
+                    boolean success = distributor.inputOrderIssue(distribID, oID, pubID, issueTitle, dueBy, shippingCost,
                             datePlaced, deliveryStatus, paymentStatus, copies);
-                    System.out.println("Order added successfully.");
+                    if (success) {
+                        System.out.println(GREEN + "Order added successfully." + RESET);
+                    } else {
+                        System.out.println(RED + "This is not possible" + RESET);
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -135,13 +149,18 @@ public class DistributorUI {
         int distribID = Integer.parseInt(s.nextLine());
         System.out.println("Enter the order ID;");
         int oID = Integer.parseInt(s.nextLine());
-        System.out.println("Enter the status of the order: ");
-        String paymentStatus = s.nextLine();
         try {
-            distributor.billDistributor(oID, distribID, paymentStatus);
+            boolean success = distributor.billDistributor(oID, distribID);
+            if (success){
+                System.out.println(GREEN +"Distributor billed successfully!"+RESET);
+            }
+            else{
+                System.out.println("Billed failed. Please check the order ID.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
     }
 
     public static void handleReceivePayment(Scanner s, Distributor distributor) {
@@ -157,14 +176,19 @@ public class DistributorUI {
 
         System.out.print("Enter the ID of the order you want to pay: ");
         int oID = Integer.parseInt(s.nextLine());
-
-        boolean success = distributor.receivePayment(oID, distribID);
-
-        if (success) {
-            System.out.println("Payment received successfully!");
-        } else {
-            System.out.println("Payment failed. Please check the order ID.");
+        try{
+            boolean success = distributor.receivePayment(oID, distribID);
+            if (success) {
+                System.out.println("Payment received successfully!");
+            } else {
+                System.out.println("Payment failed. Please check the order ID.");
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
         }
+        
+
+        
     }
 
     public static void handleIdentifyMismatchedDistributors(Scanner s, Distributor distributor) {
