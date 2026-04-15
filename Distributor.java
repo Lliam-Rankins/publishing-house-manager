@@ -17,7 +17,8 @@ public class Distributor {
     }
 
     /**
-     * Adds a new distributor to the database.
+     * Adds a new distributor to the database. For this it is necessary to gather
+     * all the requiered information
      *
      * @param distribID   unique identifier of the distributor
      * @param balance     current balance of the distributor
@@ -60,7 +61,8 @@ public class Distributor {
     }
 
     /**
-     * Update Distributor
+     * Update Distributor, the user enter the field they want to update and then the
+     * value
      *
      * @param distribID unique identifier of the distributor
      * @param field     which field of distributor information you want to update:
@@ -274,6 +276,7 @@ public class Distributor {
     }
 
     /**
+     * This function checks if a certain order was placed by a ceratin author
      * 
      * @param oID
      * @param distribID
@@ -429,6 +432,13 @@ public class Distributor {
         return true;
     }
 
+    /**
+     * This function returns the total of an order by adding the shipping cost}
+     * and the product of the number of copies and the price of individual copies
+     * 
+     * @param orderID
+     * @return
+     */
     public static float getOrderTotal(int orderID) {
         // Try issues first
         String query = "SELECT (o.copies * i.price + o.shippingCost) AS orderTotal " +
@@ -468,6 +478,7 @@ public class Distributor {
     }
 
     /**
+     * This function list all unpaid order form a certain author
      * 
      * @param distribID
      * @return
