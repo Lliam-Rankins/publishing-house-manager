@@ -36,10 +36,10 @@ public class Distributor {
         DBManager.beginTransaction();
         // only add null if there is no a value
         String phoneVal = (phoneNumber == null || phoneNumber.trim().isEmpty()) ? "NULL"
-            : "'" + phoneNumber.trim().replace("'", "''") + "'";
-        String catVal = (category == null || category.trim().isEmpty()) ? "NULL" 
+                : "'" + phoneNumber.trim().replace("'", "''") + "'";
+        String catVal = (category == null || category.trim().isEmpty()) ? "NULL"
                 : "'" + category.trim().replace("'", "''") + "'";
-        String nameVal = (name == null || name.trim().isEmpty()) ? "NULL" 
+        String nameVal = (name == null || name.trim().isEmpty()) ? "NULL"
                 : "'" + name.trim().replace("'", "''") + "'";
         // always add quotes to NOT NULL values
         String contactVal = "'" + contactName.trim().replace("'", "''") + "'";
@@ -81,7 +81,7 @@ public class Distributor {
             DBManager.rollbackTransaction();
         } else {
             DBManager.commitTransaction();
-            System.out.println(GREEN+ "Change made Successfully!"+ RESET);
+            System.out.println(GREEN + "Change made Successfully!" + RESET);
         }
         pstmt.close();
     }
@@ -131,8 +131,8 @@ public class Distributor {
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
 
-        if (copies <= 0 || (shippingCost != null && shippingCost < 0)){
-            System.out.println(RED + "Not valid values for copies or shipping cost"+ RESET);
+        if (copies <= 0 || (shippingCost != null && shippingCost < 0)) {
+            System.out.println(RED + "Not valid values for copies or shipping cost" + RESET);
             return false;
         }
 
@@ -202,8 +202,8 @@ public class Distributor {
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
 
-        if (copies <= 0 || (shippingCost != null && shippingCost < 0)){
-            System.out.println(RED + "Not valid values for copies or shipping cost"+ RESET);
+        if (copies <= 0 || (shippingCost != null && shippingCost < 0)) {
+            System.out.println(RED + "Not valid values for copies or shipping cost" + RESET);
             return false;
         }
         // Handle NULL values for optional fields
@@ -258,7 +258,7 @@ public class Distributor {
     public boolean billDistributor(int oID, int distribID) throws SQLException {
         if (!checkPlacedBy(oID, distribID)) {
             // if false not execute
-            return false; 
+            return false;
         }
         DBManager.beginTransaction();
         String sql2 = String.format(
@@ -283,9 +283,9 @@ public class Distributor {
 
     public boolean checkPlacedBy(int oID, int distribID) throws SQLException {
         String sql = "SELECT o.paymentStatus FROM `Order` o " +
-                     "JOIN PlacedBy p ON o.oID = p.oID " +
-                     "WHERE o.oID = ? AND p.distribID = ?";
-                     
+                "JOIN PlacedBy p ON o.oID = p.oID " +
+                "WHERE o.oID = ? AND p.distribID = ?";
+
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, oID);
         pstmt.setInt(2, distribID);
@@ -302,8 +302,10 @@ public class Distributor {
                 isValid = true; // It is of the distributor and we can bill it
             }
         } else {
-            // If the result is empty is because this order is not associated with the distributor
-            System.out.println("Error: Order ID " + oID + " does not belong to Distributor ID " + distribID + " or does not exist.");
+            // If the result is empty is because this order is not associated with the
+            // distributor
+            System.out.println("Error: Order ID " + oID + " does not belong to Distributor ID " + distribID
+                    + " or does not exist.");
         }
 
         rs.close();
@@ -322,7 +324,7 @@ public class Distributor {
 
         if (!checkPlacedBy(oID, distribID)) {
             // if false not execute
-            return false; 
+            return false;
         }
 
         DBManager.beginTransaction();
@@ -330,7 +332,7 @@ public class Distributor {
         try {
             String checkStatusSql = String.format("SELECT paymentStatus FROM `Order` WHERE oID = %d", oID);
             ResultSet rsStatus = DBManager.executeQuery(checkStatusSql);
-            
+
             if (rsStatus.next()) {
                 String status = rsStatus.getString("paymentStatus");
                 // Use equalsIgnoreCase to be safe with casing (e.g. "paid", "Paid", "PAID")
@@ -348,11 +350,11 @@ public class Distributor {
             DBManager.rollbackTransaction();
             return false;
         }
-        //Changing the status
+        // Changing the status
         String sql = String.format(
                 "UPDATE `Order` SET paymentStatus = '%s' WHERE oID = %d",
                 "Paid", oID);
-    
+
         if (!DBManager.executeUpdate(sql)) {
             System.out.println("It is not possible to pay this order");
             DBManager.rollbackTransaction();
@@ -384,14 +386,17 @@ public class Distributor {
             rsIsbn.close();
 
             if (orderTotal == 0.0f) {
-                //using COALESCE TO PROTECT OPERATIONS FROM NULL
+                // using COALESCE TO PROTECT OPERATIONS FROM NULL
                 String issueSql = String.format(
-                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + COALESCE(o.shippingCost, 0) AS orderTotal " + // <-- ¡Espacio agregado aquí!
-                        "FROM `Order` o " +
-                        "JOIN ContainsIssue ci ON o.oID = ci.oID " +
-                        "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
-                        "WHERE o.oID = %d " +
-                        "GROUP BY o.oID, o.shippingCost",
+                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + COALESCE(o.shippingCost, 0) AS orderTotal " + // <--
+                                                                                                                     // ¡Espacio
+                                                                                                                     // agregado
+                                                                                                                     // aquí!
+                                "FROM `Order` o " +
+                                "JOIN ContainsIssue ci ON o.oID = ci.oID " +
+                                "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
+                                "WHERE o.oID = %d " +
+                                "GROUP BY o.oID, o.shippingCost",
                         oID);
                 ResultSet rsIssue = DBManager.executeQuery(issueSql);
                 if (rsIssue.next() && rsIssue.getObject("orderTotal") != null) {
@@ -523,26 +528,35 @@ public class Distributor {
      */
     public void identifyMismatchedDistributors() throws SQLException {
 
-        String sql = "SELECT CombinedResults.distribID, CombinedResults.name, CombinedResults.balance, " +
-                "SUM(SubBalance) as CalculatedBalance " +
+        String sql = "SELECT d.distribID, d.name, d.balance, " +
+                "COALESCE(calc.CalculatedBalance, 0) AS CalculatedBalance " +
+                "FROM Distributor d " +
+                "LEFT JOIN ( " +
+                "SELECT CombinedResults.distribID, SUM(SubBalance) AS CalculatedBalance " +
                 "FROM ( " +
-                "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
+                "SELECT Distributor.distribID, " +
                 "SUM(`Order`.shippingCost + (`Order`.copies * Issue.price)) AS SubBalance " +
-                "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
-                "NATURAL JOIN ContainsIssue NATURAL JOIN Issue " +
-                "WHERE `Order`.paymentStatus = 'Not Paid' " +
+                "FROM Distributor " +
+                "NATURAL JOIN PlacedBy " +
+                "NATURAL JOIN `Order` " +
+                "NATURAL JOIN ContainsIssue " +
+                "NATURAL JOIN Issue " +
+                "WHERE `Order`.paymentStatus != 'Paid' " +
                 "GROUP BY Distributor.distribID " +
                 "UNION ALL " +
-                "SELECT Distributor.distribID, Distributor.name, Distributor.balance, " +
+                "SELECT Distributor.distribID, " +
                 "SUM(`Order`.shippingCost + (`Order`.copies * Edition.price)) AS SubBalance " +
-                "FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` " +
-                "NATURAL JOIN ContainsISBN NATURAL JOIN Edition " +
-                "WHERE `Order`.paymentStatus = 'Not Paid' " +
+                "FROM Distributor " +
+                "NATURAL JOIN PlacedBy " +
+                "NATURAL JOIN `Order` " +
+                "NATURAL JOIN ContainsISBN " +
+                "NATURAL JOIN Edition " +
+                "WHERE `Order`.paymentStatus != 'Paid' " +
                 "GROUP BY Distributor.distribID " +
                 ") AS CombinedResults " +
                 "GROUP BY CombinedResults.distribID " +
-                "HAVING ABS(balance - CalculatedBalance) >= 0.01";
-
+                ") AS calc ON d.distribID = calc.distribID " +
+                "WHERE ABS(d.balance - COALESCE(calc.CalculatedBalance, 0)) >= 0.01";
         ResultSet rs = DBManager.executeQuery(sql);
 
         while (rs.next()) {
