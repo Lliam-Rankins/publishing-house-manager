@@ -1,25 +1,21 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-
-/** Assert fields are proper length = titles, ISBN, type etc */
-
-// State character limits
 
 /**
- * TODO: 1. DELETION HIERARCHIES 2. Do searches by topic etc need all info or
- * just key info?
- * 
- * 
- *
- * 
- * 
+ * The Publication class handles all of the query building and execution of
+ * operations relating to publications, issues,
+ * articles, editions and authors for GutenbergDb.
  */
 public class Publication {
-  // Adding publications in general (periodic or non periodic without edition
-  // link)
-
-  // title, pub periodicity can be null DONE WITH TESTING
+  /**
+   * Adds a publication object to the database.
+   * 
+   * @param pubID          pubID for the publication
+   * @param title          title for the publication (can be null)
+   * @param type           type of the publication
+   * @param pubPeriodicity periodicity of the publication (can be null if
+   *                       publication is an edition)
+   */
   public static boolean addPublication(int pubID, String title, String type, String pubPeriodicity) {
     String titleValue = (title == null || title.isEmpty()) ? "NULL" : "'" + title + "'";
     String periodicityValue = (pubPeriodicity == null || pubPeriodicity.isEmpty()) ? "NULL"
@@ -37,26 +33,50 @@ public class Publication {
 
   }
 
-  // Adding publications and edition with edition link
-  // title, edition title, date written, date published, price can be null
-  // DONE WITH TESTING
+  /**
+   * Adds a publication object, edition object, and links them together all in one
+   * method.
+   * Each insert statement is executed separately and controlled with a
+   * transaction, ensuring that if
+   * any part of the process fails, the database will be left in a consistent
+   * state.
+   * 
+   * @param pubID         pubID for the publication
+   * @param title         title of the publication (can be null)
+   * @param type          type of the publication
+   * @param ISBN          ISBN of the edition
+   * @param edition       edition number
+   * @param editionTitle  title of the edition (can be null)
+   * @param dateWritten   date the edition was written (can be null)
+   * @param datePublished date the edition was published (can be null)
+   * @param price         price of the publication (can be null)
+   * @return true if the publication and edition were added successfully, false
+   *         otherwise
+   */
   public static boolean addEditionPublication(int pubID, String title, String type, long ISBN, int edition,
       String editionTitle, java.sql.Date dateWritten, java.sql.Date datePublished, double price) {
     try {
+      // Handle null checks for all potential null values, set the query input to the
+      // appropriate values
       String titleValue = (title == null || title.isEmpty()) ? "NULL" : "'" + title + "'";
       String editionTitleValue = (editionTitle == null || editionTitle.isEmpty()) ? "NULL" : "'" + editionTitle + "'";
       String dateWrittenValue = (dateWritten == null) ? "NULL"
           : "'" + dateWritten.toString() + "'";
       String datePublishedValue = (datePublished == null) ? "NULL"
           : "'" + datePublished.toString() + "'";
+      // Begin transaction, first needing to insert into the publication relation
       DBManager.beginTransaction();
       String query = "INSERT INTO Publication VALUES (%d, '%s', %s, NULL)";
       query = String.format(query, pubID, type, titleValue);
+      // If there is an unsuccessful addition to the Publication relation, rollback
+      // the transaction
       if (!DBManager.executeUpdate(query)) {
         System.out.println("Couldn't add publication to database - check for primary key conflict\n");
         DBManager.rollbackTransaction();
         return false;
       }
+      // If the price is meant to be null, insert null in the price field
+      // This conditional forms the insert statement into the Edition relation
       if (price >= 0) {
         query = "INSERT INTO Edition VALUES (%d, %d, %s, %s, %s, %f)";
         query = String.format(query, ISBN, edition, editionTitleValue, dateWrittenValue, datePublishedValue, price);
@@ -64,13 +84,17 @@ public class Publication {
         query = "INSERT INTO Edition VALUES (%d, %d, %s, %s, %s, NULL)";
         query = String.format(query, ISBN, edition, editionTitleValue, dateWrittenValue, datePublishedValue);
       }
+      // If the edition cannot be added, rollback the transaction
       if (!DBManager.executeUpdate(query)) {
         System.out.println("Couldn't add edition to database - check for primary key conflict\n");
         DBManager.rollbackTransaction();
         return false;
       }
+      // Lastly, insert the edition and publication link into the ISBNPublication
+      // relation
       query = "INSERT INTO ISBNPublication VALUES (%d, %d)";
       query = String.format(query, ISBN, pubID);
+      // If the link cannot be added, rollback the transaction
       if (!DBManager.executeUpdate(query)) {
         System.out.println("Couldn't link ISBN to publication - ensure pubID and ISBN are valid\n");
         DBManager.rollbackTransaction();
@@ -79,6 +103,12 @@ public class Publication {
       System.out.println("Publication and edition added successfully\n");
       DBManager.commitTransaction();
       return true;
+      /**
+       * All three relations must be updated accordingly, or none at all, to ensure
+       * that the publication
+       * and corresponding edition are added and linked together.
+       */
+
     } catch (Exception e) {
       System.out.println("Process failed. Ensure input is correct.\n");
       DBManager.rollbackTransaction();
@@ -88,13 +118,23 @@ public class Publication {
 
   }
 
-  // Updating just the publication details
-  // title, pub periodicity can be null
-  // DONE TESTING
+  /**
+   * Updates the details of the publication.
+   * 
+   * @param pubID          pubID for the publication
+   * @param title          title for the publication (can be null)
+   * @param type           type of the publication
+   * @param pubPeriodicity periodicity of the publication (can be null if
+   *                       publication is an edition)
+   * @return true if the publication was updated successfully, false otherwise
+   * 
+   */
   public static boolean updatePublication(int pubID, String title, String type, String pubPeriodicity) {
+    // Check for null values where applicable
     String titleValue = (title == null || title.isEmpty()) ? "NULL" : "'" + title + "'";
     String periodicityValue = (pubPeriodicity == null || pubPeriodicity.isEmpty()) ? "NULL"
         : "'" + pubPeriodicity + "'";
+    // Assert that publications with editions cannot have a periodicity
     if (!periodicityValue.equals("NULL")) {
       String query = "SELECT * FROM ISBNPublication WHERE pubID = %d";
       query = String.format(query, pubID);
@@ -109,6 +149,7 @@ public class Publication {
       }
     }
 
+    // If validity checks are good, update the publication at the given pubID
     String query = "UPDATE Publication SET title = %s, type = '%s', pubPeriodicity = %s WHERE pubID = %d";
     query = String.format(query, titleValue, type, periodicityValue, pubID);
     if (!DBManager.executeUpdate(query)) {
@@ -120,8 +161,12 @@ public class Publication {
     return true;
   }
 
-  // Remove the publication and nothing else for now
-  // TESTING DONE
+  /**
+   * Removes the publication object from the database.
+   * 
+   * @param pubID the pubID of the publication
+   * @return true if the publication was deleted, false otherwise
+   */
   public static boolean removePublication(int pubID) {
     String query = "DELETE FROM Publication WHERE pubID = %d";
     query = String.format(query, pubID);
@@ -135,9 +180,18 @@ public class Publication {
     return true;
   }
 
-  // Adding edition to an existing publication and linking it with the publication
-  // edition title, date written, date published, price can be null
-  // TESTING DONE
+  /**
+   * Add an edition and its link to an existing publication with a null
+   * periodicity.
+   * 
+   * @param pubID         the pubID of the publication
+   * @param ISBN          the ISBN of the edition
+   * @param edition       the edition number of the edition
+   * @param editionTitle  the title of the edition (can be null)
+   * @param dateWritten   the date the edition was written (can be null)
+   * @param datePublished the date the edition was published (can be null)
+   * @param price         the price of the edition (can be null)
+   */
   public static boolean addBookEditionToExistingPub(int pubID, long ISBN, int edition, String editionTitle,
       java.sql.Date dateWritten, java.sql.Date datePublished, double price) {
     String editionTitleValue = (editionTitle == null || editionTitle.isEmpty()) ? "NULL" : "'" + editionTitle + "'";
@@ -147,6 +201,8 @@ public class Publication {
         : "'" + datePublished.toString() + "'";
     String query = "SELECT * FROM Publication WHERE pubID = %d AND pubPeriodicity IS NULL";
     query = String.format(query, pubID);
+    // Check to see if there is a publication with a null periodicity with the given
+    // pubID
     try {
       if (!DBManager.executeQuery(query).next()) {
         System.out.println("Eligible publication not found\n");
@@ -156,6 +212,8 @@ public class Publication {
       System.out.println("Error processing results\n");
       return false;
     }
+    // Transaction to enter the edition details and then link the edition to the
+    // publication
     DBManager.beginTransaction();
     if (price >= 0) {
       query = "INSERT INTO Edition VALUES (%d, %d, %s, %s, %s, %f)";
@@ -164,11 +222,14 @@ public class Publication {
       query = "INSERT INTO Edition VALUES (%d, %d, %s, %s, %s, NULL)";
       query = String.format(query, ISBN, edition, editionTitleValue, dateWrittenValue, datePublishedValue);
     }
+    // If edition details cannot be added, rollback the transaction to avoid having
+    // an unlinked publication or partial edition details in the database
     if (!DBManager.executeUpdate(query)) {
       System.out.println("Couldn't add book edition to database\n");
       DBManager.rollbackTransaction();
       return false;
     }
+    // If link cannot be added, rollback the transaction
     query = "INSERT INTO ISBNPublication VALUES (%d, %d)";
     query = String.format(query, ISBN, pubID);
     if (!DBManager.executeUpdate(query)) {
@@ -176,14 +237,23 @@ public class Publication {
       DBManager.rollbackTransaction();
       return false;
     }
+    // Commit if all is successful
     DBManager.commitTransaction();
     System.out.println("Book edition added successfully\n");
     return true;
   }
 
-  // Updating just the edition details
-  // edition title, date written, date published, price can be null
-  // TESTING DONE
+  /**
+   * Updates the details of the edition with the given ISBN.
+   * 
+   * @param ISBN          the ISBN of the edition
+   * @param edition       the edition number of the edition
+   * @param editionTitle  the title of the edition (can be null)
+   * @param dateWritten   the date the edition was written (can be null)
+   * @param datePublished the date the edition was published (can be null)
+   * @param price         the price of the edition (can be null)
+   * @return true if the edition was updated successfully, false otherwise
+   */
   public static boolean updateBookEdition(long ISBN, int edition, String editionTitle, java.sql.Date dateWritten,
       java.sql.Date datePublished, double price) {
     String editionTitleValue = (editionTitle == null || editionTitle.isEmpty()) ? "NULL" : "'" + editionTitle + "'";
@@ -191,6 +261,8 @@ public class Publication {
         : "'" + dateWritten.toString() + "'";
     String datePublishedValue = (datePublished == null) ? "NULL"
         : "'" + datePublished.toString() + "'";
+    // Null checks and check that price isn't supposed to be null
+    // If price is meant to be null, insert the value as null in the table
     if (price >= 0) {
       String query = "UPDATE Edition SET edition = %d, editionTitle = %s, dateWritten = %s, datePublished = %s, price = %f WHERE ISBN = %d";
       query = String.format(query, edition, editionTitleValue, dateWrittenValue, datePublishedValue, price, ISBN);
@@ -210,7 +282,13 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Removes the given edition and its publication from the database.
+   * 
+   * @param pubID the pubID of the publication
+   * @param ISBN  the ISBN of the edition
+   * @return true if it could be removed, false otherwise
+   */
   public static boolean removeBookEditionAndPublication(int pubID, long ISBN) {
     DBManager.beginTransaction();
     String query = "DELETE FROM ISBNPublication WHERE ISBN = %d AND pubID = %d";
@@ -242,7 +320,13 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Removes the edition and its link, but doesn't remove the associated
+   * publication.
+   * 
+   * @param ISBN the ISBN of the edition
+   * @return true if it was deleted, false if not
+   */
   public static boolean removeBookEditionNotPub(long ISBN) {
     DBManager.beginTransaction();
     String query = "DELETE FROM ISBNPublication WHERE ISBN = %d";
@@ -266,8 +350,15 @@ public class Publication {
     return true;
   }
 
-  // pub date and price can be null
-  // Done testing
+  /**
+   * Adds an issue to the database
+   * 
+   * @param pubID      the pubID of the issue
+   * @param issueTitle the issue title of the specific issue
+   * @param pubDate    the date the issue was published (can be null)
+   * @param price      the price of the issue (can be null)
+   * @return true if added, false if not
+   */
   public static boolean addIssue(int pubID, String issueTitle, java.sql.Date pubDate, double price) {
     String pubDateValue = (pubDate == null) ? "NULL" : "'" + pubDate.toString() + "'";
     if (price >= 0) {
@@ -289,8 +380,15 @@ public class Publication {
     return true;
   }
 
-  // pub date and price can be null
-  // DONE TESTING
+  /**
+   * Edits an existing issue in the database
+   * 
+   * @param pubID      the pubID of the issue
+   * @param issueTitle the issue title of the specific issue
+   * @param pubDate    the date the issue was published (can be null)
+   * @param price      the price of the issue (can be null)
+   * @return true if updated, false if not
+   */
   public static boolean editIssue(int pubID, String issueTitle, java.sql.Date pubDate, double price) {
     String pubDateValue = (pubDate == null) ? "NULL" : "'" + pubDate.toString() + "'";
     if (price >= 0) {
@@ -312,7 +410,13 @@ public class Publication {
     return true;
   }
 
-  // TESTING DONE
+  /**
+   * Removes an issue from the database.
+   * 
+   * @param pubID      the pubID of the publication
+   * @param issueTitle the title of the issue being removed
+   * @return true if removed, false if not
+   */
   public static boolean removeIssue(int pubID, String issueTitle) {
     String query = "DELETE FROM Issue WHERE pubID = %d AND issueTitle = '%s'";
     query = String.format(query, pubID, issueTitle);
@@ -324,7 +428,15 @@ public class Publication {
     return true;
   }
 
-  // TESTING DONE
+  /**
+   * Adds a chapter that will be associated with the given edition, doesn't add
+   * the details of the chapter.
+   * This is like adding the chapter to the table of contents of the edition.
+   * 
+   * @param ISBN         the ISBN of the edition
+   * @param chapterTitle the title of the chapter being added
+   * @return true if added, false if not
+   */
   public static boolean addChapterTOC(long ISBN, String chapterTitle) {
     String query = "INSERT INTO Chapter VALUES (%d, '%s', NULL, NULL, NULL)";
     query = String.format(query, ISBN, chapterTitle);
@@ -336,8 +448,16 @@ public class Publication {
     return true;
   }
 
-  // text, date and topic can be null
-  // DONE TESTING
+  /**
+   * Edits the details of an existing chapter for an edition.
+   * 
+   * @param ISBN         the ISBN of the edition
+   * @param chapterTitle the title of the chapter
+   * @param date         the date published (can be null)
+   * @param text         the text of the chapter (can be null)
+   * @param topic        the topic of the chapter (can be null)
+   * @return true if chapter was updated, false if not
+   */
   public static boolean editChapter(long ISBN, String chapterTitle, java.sql.Date date, String text, String topic) {
     String textValue = (text == null || text.isEmpty()) ? "NULL" : "'" + text + "'";
     String dateValue = (date == null) ? "NULL" : "'" + date.toString() + "'";
@@ -352,7 +472,16 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Updates the author of a chapter, which is separate from the edit chapter
+   * application.
+   * 
+   * @param ISBN         the ISBN of the edition
+   * @param chapterTitle the title of the chapter
+   * @param pID          the pID of the author
+   * @param invited      whether or not the author was invited
+   * @return true if updated, false if not
+   */
   public static boolean updateChapterAuthor(long ISBN, String chapterTitle, int pID, boolean invited) {
     String query = "SELECT * FROM WritesChapter WHERE ISBN = %d AND chapterTitle = '%s'";
     query = String.format(query, ISBN, chapterTitle);
@@ -386,7 +515,13 @@ public class Publication {
     }
   }
 
-  // DONE TESTING
+  /**
+   * Removes the author for the chapter so there is now none.
+   * 
+   * @param ISBN         the ISBN of the edition
+   * @param chapterTitle the title of the chapter
+   * @return true if updated, false if not
+   */
   public static boolean removeChapterAuthor(long ISBN, String chapterTitle) {
     String query = "DELETE FROM WritesChapter WHERE ISBN = %d AND chapterTitle = '%s'";
     query = String.format(query, ISBN, chapterTitle);
@@ -398,7 +533,13 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Removes the chapter from the database and removes chapter-edition link.
+   * 
+   * @param ISBN         the ISBN of the edition
+   * @param chapterTitle the title of the chapter
+   * @return true if updated, false if not
+   */
   public static boolean removeChapterTOC(long ISBN, String chapterTitle) {
     // Delete from WritesChapter iF NECESSARY, not every chapter will have an author
     String query = "DELETE FROM WritesChapter WHERE ISBN = %d AND chapterTitle = '%s'";
@@ -417,7 +558,14 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Adds an article to the database.
+   * 
+   * @param pubID        the pubID of the publication
+   * @param issueTitle   the title of the issue
+   * @param articleTitle the title of the article
+   * @return true if added, false if not
+   */
   public static boolean addArticleTOC(int pubID, String issueTitle, String articleTitle) {
     String query = "INSERT INTO Article VALUES (%d, '%s', '%s', NULL, NULL, NULL)";
     query = String.format(query, pubID, issueTitle, articleTitle);
@@ -429,8 +577,17 @@ public class Publication {
     return true;
   }
 
-  // date written, text and topic can be null
-  // DONE TESTING
+  /**
+   * Edits the article details.
+   * 
+   * @param pubID        the pubID of the publication
+   * @param issueTitle   the title of the issue
+   * @param articleTitle the title of the article
+   * @param dateWritten  the date that the article was written (can be null)
+   * @param text         the text of the article (can be null)
+   * @param topic        the topic of the article (can be null)
+   * @return true if added, false if not
+   */
   public static boolean editArticle(int pubID, String issueTitle, String articleTitle, java.sql.Date dateWritten,
       String text, String topic) {
     String textValue = (text == null || text.isEmpty()) ? "NULL" : "'" + text + "'";
@@ -447,7 +604,16 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Updates the article author.
+   * 
+   * @param pubID        pubID of the article
+   * @param issueTitle   title of the issue
+   * @param articleTitle title of the article
+   * @param pID          pID of the author
+   * @param invited      whether or not the author was invited
+   * @return true if updated, false if not
+   */
   public static boolean updateArticleAuthor(int pubID, String issueTitle, String articleTitle, int pID,
       boolean invited) {
     String query = "SELECT * FROM WritesArticle WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
@@ -482,7 +648,14 @@ public class Publication {
     }
   }
 
-  // DONE TESTING
+  /**
+   * Removes the article author
+   * 
+   * @param pubID        pubID of the publication
+   * @param issueTitle   title of the issue
+   * @param articleTitle title of the article
+   * @return true if updated, false if not
+   */
   public static boolean removeArticleAuthor(int pubID, String issueTitle, String articleTitle) {
     String query = "DELETE FROM WritesArticle WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
     query = String.format(query, pubID, issueTitle, articleTitle);
@@ -494,7 +667,14 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Removes the article from the database.
+   * 
+   * @param pubID        pubID of the publication
+   * @param issueTitle   title of the issue
+   * @param articleTitle title of the article
+   * @return true if updated, false if not
+   */
   public static boolean removeArticleTOC(long pubID, String issueTitle, String articleTitle) {
     String query = "DELETE FROM WritesArticle WHERE pubID = %d AND issueTitle = '%s' AND articleTitle = '%s'";
     query = String.format(query, pubID, issueTitle, articleTitle);
@@ -512,7 +692,12 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Finds editions with a certain topic.
+   * 
+   * @param topic the topic being searched for
+   * @return true if query was processed, false if error
+   */
   public static boolean findEditionsByTopic(String topic) {
     String query = "SELECT * FROM Edition WHERE ISBN IN (SELECT ISBN FROM Chapter WHERE topic = '%s')";
     query = String.format(query, topic);
@@ -542,7 +727,12 @@ public class Publication {
     }
   }
 
-  // DONE TESTING
+  /**
+   * Finds articles with a certain topic.
+   * 
+   * @param topic topic being searched for
+   * @return true if processed, false if error
+   */
   public static boolean findArticlesByTopic(String topic) {
     String query = "SELECT * FROM Article WHERE topic = '%s'";
     query = String.format(query, topic);
@@ -573,7 +763,13 @@ public class Publication {
     }
   }
 
-  // DONE TESTING
+  /**
+   * Finds editions published within a certain date range.
+   * 
+   * @param startDate beginning date of the range
+   * @param endDate   end date of the range
+   * @return true if processed, false if error
+   */
   public static boolean findEditionsByDateRange(java.sql.Date startDate, java.sql.Date endDate) {
     String query = "SELECT * FROM Edition WHERE datePublished BETWEEN '%s' AND '%s'";
     query = String.format(query, startDate, endDate);
@@ -592,7 +788,7 @@ public class Publication {
         } while (table.next());
       } else {
         System.out.println("Couldn't find books published in given date range\n");
-        return false;
+        return true;
 
       }
     } catch (Exception e) {
@@ -602,7 +798,13 @@ public class Publication {
     return true;
   }
 
-  // DONE TESTING
+  /**
+   * Finds articles within a given date range.
+   * 
+   * @param startDate date at the beginning of the range
+   * @param endDate   date at the end of the range
+   * @return true if processed, false if error
+   */
   public static boolean findArticlesByDateRange(java.sql.Date startDate, java.sql.Date endDate) {
     String query = "SELECT * FROM Article WHERE dateWritten BETWEEN '%s' AND '%s'";
     query = String.format(query, startDate, endDate);
@@ -630,7 +832,12 @@ public class Publication {
     }
   }
 
-  // DONE TESTING
+  /**
+   * Finds all editions written by an author with the given name.
+   * 
+   * @param authorName the name of the author
+   * @return true if processed, false if error
+   */
   public static boolean findEditionsByAuthor(String authorName) {
     String query = "SELECT * FROM Edition WHERE ISBN IN (SELECT ISBN FROM WritesChapter WHERE pID = (SELECT pID FROM Person WHERE name = '%s'))";
     query = String.format(query, authorName);
@@ -660,7 +867,12 @@ public class Publication {
 
   }
 
-  // DONE TESTING
+  /**
+   * Finds articles written by an author with the given name.
+   * 
+   * @param authorName name of the author
+   * @return true if processed, false if error
+   */
   public static boolean findArticlesByAuthor(String authorName) {
     String query = "SELECT * FROM Article WHERE articleTitle IN (SELECT articleTitle FROM WritesArticle WHERE pID = (SELECT pID FROM Person WHERE name = '%s'))";
     query = String.format(query, authorName);
@@ -689,7 +901,15 @@ public class Publication {
 
   }
 
-  // DONE TESTING
+  /**
+   * Find all the articles of 2 given issues.
+   * 
+   * @param pubID1      pubID of issue 1
+   * @param issueTitle1 issue title of issue 1
+   * @param pubID2      pubID of issue 2
+   * @param issueTitle2 issue title of issue 2
+   * @return true if processed, false if error
+   */
   public static boolean compareIssueArticles(int pubID1, String issueTitle1, int pubID2, String issueTitle2) {
     String query = "SELECT * FROM Article WHERE (pubID=%d AND issueTitle = '%s') OR (pubID=%d AND issueTitle = '%s') ORDER BY issueTitle, articleTitle";
     query = String.format(query, pubID1, issueTitle1, pubID2, issueTitle2);
