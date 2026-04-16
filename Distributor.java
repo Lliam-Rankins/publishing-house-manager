@@ -81,13 +81,9 @@ public class Distributor {
      */
     public void updateDistributor(String field, String value, int distribID) throws SQLException {
         DBManager.beginTransaction();
-        String sql = "UPDATE Distributor SET " + field + " = ? WHERE distribID = ?";
-        // use prepared statment here because the field is unkwon and we cannot know if
-        // it accept NULL or not
-        PreparedStatement pstmt = connection.prepareStatement(sql);
-        pstmt.setString(1, value);
-        pstmt.setInt(2, distribID);
-        int rows = pstmt.executeUpdate();
+        String sql = "UPDATE Distributor SET " + field + " = '" + value + "' WHERE distribID = " + distribID;
+        Statement stmt = connection.createStatement();
+        int rows = stmt.executeUpdate(sql);
         if (rows == 0) {
             System.out.println(RED + "No distributor found with ID " + distribID + RESET);
             DBManager.rollbackTransaction();
@@ -95,7 +91,7 @@ public class Distributor {
             DBManager.commitTransaction();
             System.out.println(GREEN + "Change made Successfully!" + RESET);
         }
-        pstmt.close();
+        stmt.close();
     }
 
     /**
@@ -108,12 +104,10 @@ public class Distributor {
 
     public void deleteDistributor(int distribID) throws SQLException {
         DBManager.beginTransaction();
-        String sql = "DELETE FROM Distributor WHERE distribID = ?; ";
-        // Use prepared statment to be aware of not existing data
-        PreparedStatement pstmt = connection.prepareStatement(sql);
-        pstmt.setInt(1, distribID);
-        int rows = pstmt.executeUpdate();
-        pstmt.close();
+        String sql = "DELETE FROM Distributor WHERE distribID = " + distribID + ";";
+        Statement stmt = connection.createStatement();
+        int rows = stmt.executeUpdate(sql);
+        stmt.close();
         if (rows == 0) {
             System.out.println(RED + "No distributor found with ID " + distribID + RESET);
         } else {
