@@ -28,6 +28,7 @@ public class DistributorUI {
         System.out.println("Enter state: ");
         String state = s.nextLine();
         try {
+            System.out.print("Trying to execute query");
             boolean success = distributor.addDistributor(distribID, balance, contactName, phoneNumber, category, name,
                     street, city, state);
             System.out.print("SUCCESS STATUS" + success);
@@ -39,6 +40,7 @@ public class DistributorUI {
 
         } catch (SQLException e) {
             e.printStackTrace();
+
         }
     }
 
