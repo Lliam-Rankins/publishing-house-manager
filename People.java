@@ -29,6 +29,19 @@ public class People {
         return true;
     }
 
+    /**
+     * Transaction and rollback - entering payments. Ensure that the payment is
+     * created first,
+     * then linked to the person. One cannot happen without the other.
+     * 
+     * @param paymentId   id of the payment
+     * @param amount      amout of the payment
+     * @param dateIssued  date payment was issued
+     * @param workType    type of work of the payment
+     * @param dateClaimed date payment was claimed
+     * @param personId    id of person paid
+     * @return true if payment created, false if not
+     */
     public static boolean enterPayment(int paymentId, float amount, java.sql.Date dateIssued,
             String workType, java.sql.Date dateClaimed, int personId) {
         DBManager.beginTransaction();
