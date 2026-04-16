@@ -34,6 +34,7 @@ public class Distributor {
      */
     public boolean addDistributor(int distribID, float balance, String contactName, String phoneNumber, String category,
             String name, String street, String city, String state) throws SQLException {
+
         DBManager.beginTransaction();
         // only add null if there is no a value
         String phoneVal = (phoneNumber == null || phoneNumber.trim().isEmpty()) ? "NULL"
@@ -50,7 +51,7 @@ public class Distributor {
         String sql = String.format(java.util.Locale.US,
                 "INSERT INTO Distributor VALUES(%d, %f, %s, %s, %s, %s, %s, %s, %s)",
                 distribID, balance, contactVal, phoneVal, catVal, nameVal, streetVal, cityVal, stateVal);
-
+        System.out.println("DEBUG SQL: " + sql);
         if (!DBManager.executeUpdate(sql)) {
             System.out.println(RED + "Couldn't add this distributor" + RESET);
             DBManager.rollbackTransaction();
