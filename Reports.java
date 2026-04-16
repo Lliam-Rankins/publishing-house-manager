@@ -1,4 +1,5 @@
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Reports {
     // Class for Reports
@@ -11,7 +12,12 @@ public class Reports {
     // and per work type (book authorship, article authorship, or editorial work).
     // View all publications assigned to a specific editor.
 
-    // Count number of distributors
+    /**
+     * Count the number of distributors
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean countDistributors() {
         // SQL Query
         String query = "SELECT COUNT(*) FROM Distributor;";
@@ -33,7 +39,12 @@ public class Reports {
         }
     }
 
-    // Calculate how many orders were made by each distributor
+    /**
+     * Calculate how many orders were made by each distributor
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean countOrdersByDistributor() {
         // SQL Query
         String query = "SELECT distribID, COUNT(*) FROM PlacedBy GROUP BY distribID;";
@@ -58,7 +69,12 @@ public class Reports {
         }
     }
 
-    // Calculate number of copies of each edition required by each distributor
+    /**
+     * Calculate number of copies of each edition required by each distributor
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean countEditionsByDistributor() {
         // SQL Query
         String query = "SELECT SUM(copies), distribID, ISBN FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN GROUP BY distribID, ISBN;";
@@ -84,7 +100,12 @@ public class Reports {
         }
     }
 
-    // Calculate number of copies of each issue required by each distributor
+    /**
+     * Calculate number of copies of each issue required by each distribtor
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean countIssuesByDistributor() {
         // SQL Query
         String query = "SELECT SUM(copies), distribID, issueTitle  FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue GROUP BY distribID, issueTitle;";
@@ -110,7 +131,12 @@ public class Reports {
         }
     }
 
-    // Calculate the total amount of money per distributor and per issue
+    /**
+     * Calculate the total amount of money per distributor and per issue
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalCostPerIssuesPerDistributor() {
         // SQL Query
         String query = "SELECT SUM(price * copies), distribID, issueTitle FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, issueTitle;";
@@ -136,7 +162,12 @@ public class Reports {
         }
     }
 
-    // Calculate the total amount of money per distributor and per issue
+    /**
+     * Calculate the total amount of money per distributor and per issue
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalCostPerEditionPerDistributor() {
         // SQL Query
         String query = "SELECT SUM(price * copies), distribID, editionTitle FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, editionTitle;";
@@ -162,7 +193,12 @@ public class Reports {
         }
     }
 
-    // Calculate the number of copies of publications per distributor per week
+    /**
+     * Calculate the number of copies of publications per distributor per week
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean countPublicationsPerDistributorPerWeek() {
         // SQL Query
         String query = "SELECT DISTINCT distribID, WEEK(datePlaced) AS week ,SUM(copies) AS totalCopies, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week , SUM(copies) AS totalCopies, 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced) ORDER BY distribID, week;";
@@ -189,7 +225,12 @@ public class Reports {
 
     }
 
-    // Calculate the number of copies of publications per distributor per month
+    /**
+     * Calculate the number of copies of publications per distributor per month
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean countPublicationsPerDistributorPerMonth() {
         // SQL Query
         String query = "SELECT DISTINCT distribID, MONTH(datePlaced) AS month ,SUM(copies) AS totalCopies, 'Issue' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, MONTH(datePlaced) UNION ALL SELECT distribID, MONTH(datePlaced) AS month , SUM(copies) AS totalCopies , 'Edition' AS type FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, MONTH(datePlaced) ORDER BY distribID, month;";
@@ -215,7 +256,12 @@ public class Reports {
         }
     }
 
-    // Calculate total cost per distributor per week
+    /**
+     * Calculate total cost per distributor per week
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalCostPerDistributorPerWeek() {
         // SQL Query
         String query = "SELECT distribID, week, SUM(totalPrice) AS totalPrice FROM (SELECT distribID, WEEK(datePlaced) AS week, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, WEEK(datePlaced) UNION ALL SELECT distribID, WEEK(datePlaced) AS week, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, WEEK(datePlaced)) AS combined GROUP BY distribID, week  HAVING totalPrice IS NOT NULL;";
@@ -241,7 +287,12 @@ public class Reports {
         }
     }
 
-    // Calculate total cost per distributor per month
+    /**
+     * Calculate total cost per distributor per month
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalCostPerDistributorPerMonth() {
         // SQL Query
         String query = "SELECT distribID, month, SUM(totalPrice) AS totalPrice FROM (SELECT distribID, MONTH(datePlaced) AS month, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY distribID, MONTH(datePlaced) UNION ALL SELECT distribID, MONTH(datePlaced) AS month, SUM(price * copies) AS totalPrice FROM `Order` NATURAL JOIN PlacedBy NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY distribID, MONTH(datePlaced)) AS combined GROUP BY distribID, month HAVING totalPrice IS NOT NULL;\r\n"
@@ -268,7 +319,12 @@ public class Reports {
         }
     }
 
-    // Calculate total revenue per city
+    /**
+     * Calculate total revenue per city
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalRevenuePerCity() {
         // SQL Query
         String query = "SELECT city, SUM(revenue) AS totalRevenue FROM (SELECT city, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY city UNION ALL SELECT city, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY city) AS CombinedResults GROUP BY city;";
@@ -293,7 +349,12 @@ public class Reports {
         }
     }
 
-    // Calculate total revenue per distributor
+    /**
+     * Calcualte total revenue per distributor
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalRevenuePerDistributor() {
         // SQL Query
         String query = "SELECT distribID, SUM(revenue) AS totalRevenue FROM (SELECT Distributor.distribID, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY Distributor.distribID UNION ALL SELECT Distributor.distribID, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY Distributor.distribID) AS CombinedResults GROUP BY distribID;";
@@ -319,7 +380,12 @@ public class Reports {
         }
     }
 
-    // Calculate total expenses (Shipping Cost)
+    /**
+     * Calculate total expenses (Shipping cost and payroll)
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalExpenses() {
         // SQL Query
         String query = "SELECT SUM(cost) FROM (SELECT shippingCost as cost FROM `Order` UNION ALL SELECT amount as cost FROM Payment) as costTable;";
@@ -341,7 +407,12 @@ public class Reports {
         }
     }
 
-    // Calculate total expenses (Shipping Cost)
+    /**
+     * Calculate total revenue
+     *
+     * @return true if the query was executed correctly, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean totalRevenue() {
         // SQL Query
         String query = "SELECT SUM(revenue) AS totalRevenue FROM (SELECT Distributor.distribID, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsISBN NATURAL JOIN Edition GROUP BY Distributor.distribID UNION ALL SELECT Distributor.distribID, SUM(price * copies) as revenue FROM Distributor NATURAL JOIN PlacedBy NATURAL JOIN `Order` NATURAL JOIN ContainsIssue NATURAL JOIN Issue GROUP BY Distributor.distribID) AS CombinedResults;";
