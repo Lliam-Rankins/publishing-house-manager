@@ -82,16 +82,14 @@ public class Distributor {
     public void updateDistributor(String field, String value, int distribID) throws SQLException {
         DBManager.beginTransaction();
         String sql = "UPDATE Distributor SET " + field + " = '" + value + "' WHERE distribID = " + distribID;
-        Statement stmt = connection.createStatement();
-        int rows = stmt.executeUpdate(sql);
-        if (rows == 0) {
-            System.out.println(RED + "No distributor found with ID " + distribID + RESET);
+
+        if (!DBManager.executeUpdate(sql)) {
+            System.out.println(RED + "No distributor found with ID " + distribID + " or couldn't update." + RESET);
             DBManager.rollbackTransaction();
         } else {
-            DBManager.commitTransaction();
             System.out.println(GREEN + "Change made Successfully!" + RESET);
+            DBManager.commitTransaction();
         }
-        stmt.close();
     }
 
     /**
@@ -104,16 +102,15 @@ public class Distributor {
 
     public void deleteDistributor(int distribID) throws SQLException {
         DBManager.beginTransaction();
-        String sql = "DELETE FROM Distributor WHERE distribID = " + distribID + ";";
-        Statement stmt = connection.createStatement();
-        int rows = stmt.executeUpdate(sql);
-        stmt.close();
-        if (rows == 0) {
-            System.out.println(RED + "No distributor found with ID " + distribID + RESET);
+        String sql = "DELETE FROM Distributor WHERE distribID = " + distribID;
+
+        if (!DBManager.executeUpdate(sql)) {
+            System.out.println(RED + "No distributor found with ID " + distribID + " or couldn't delete." + RESET);
+            DBManager.rollbackTransaction();
         } else {
             System.out.println(GREEN + "Distributor deleted successfully." + RESET);
+            DBManager.commitTransaction();
         }
-        DBManager.commitTransaction();
     }
 
     /**
