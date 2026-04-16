@@ -43,7 +43,7 @@ public class DistributorUI {
         System.out.println("DEBUG: Read state: '" + state + "'");
 
         try {
-            System.out.print("Trying to execute query");
+            System.out.println("DEBUG: Trying to execute query...");s
             boolean success = distributor.addDistributor(distribID, balance, contactName, phoneNumber, category, name,
                     street, city, state);
             System.out.print("SUCCESS STATUS" + success);
