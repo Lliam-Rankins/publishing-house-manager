@@ -11,36 +11,24 @@ public class DistributorUI {
     public static void handleAddDistributor(Scanner s, Distributor distributor) {
         System.out.println("Enter Distributor ID: ");
         String distribIDStr = s.nextLine();
-        System.out.println("DEBUG: Read distribID string: '" + distribIDStr + "'");
         int distribID = Integer.parseInt(distribIDStr);
-        System.out.println("DEBUG: Parsed distribID: " + distribID);
-
         System.out.println("Enter balance: ");
         String balanceStr = s.nextLine();
-        System.out.println("DEBUG: Read balance string: '" + balanceStr + "'");
         float balance = Float.parseFloat(balanceStr);
-        System.out.println("DEBUG: Parsed balance: " + balance);
         System.out.println("Enter contact name: ");
         String contactName = s.nextLine();
-        System.out.println("DEBUG: Read contactName: '" + contactName + "'");
         System.out.println("Enter phone number (or enter to Skip): ");
         String phoneNumber = s.nextLine();
-        System.out.println("DEBUG: Read phoneNumber: '" + phoneNumber + "'");
         System.out.println("Enter category (or enter to Skip): ");
         String category = s.nextLine();
-        System.out.println("DEBUG: Read category: '" + category + "'");
         System.out.println("Enter name (or enter to Skip): ");
         String name = s.nextLine();
-        System.out.println("DEBUG: Read name: '" + name + "'");
         System.out.println("Enter street: ");
         String street = s.nextLine();
-        System.out.println("DEBUG: Read street: '" + street + "'");
         System.out.println("Enter city: ");
         String city = s.nextLine();
-        System.out.println("DEBUG: Read city: '" + city + "'");
         System.out.println("Enter state: ");
         String state = s.nextLine();
-        System.out.println("DEBUG: Read state: '" + state + "'");
 
         try {
             System.out.println("DEBUG: Trying to execute query...");

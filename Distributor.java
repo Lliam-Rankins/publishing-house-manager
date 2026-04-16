@@ -39,8 +39,8 @@ public class Distributor {
     public boolean addDistributor(int distribID, float balance, String contactName, String phoneNumber, String category,
             String name, String street, String city, String state) throws SQLException {
 
-        System.out.println("DEBUG: Entering addDistributor");
-        System.out.println("DEBUG: distribID=" + distribID + ", balance=" + balance);
+        // System.out.println("DEBUG: Entering addDistributor");
+        // System.out.println("DEBUG: distribID=" + distribID + ", balance=" + balance);
 
         DBManager.beginTransaction();
         // only add null if there is no a value
