@@ -437,7 +437,8 @@ public class Reports {
     /**
      * Calculate the total payments maded in a month
      * 
-     * @return
+     * @return the total amount of money paid per month, 1 is January, 12 is
+     *         December
      */
     public static boolean totalPaymentsPerMonth() {
         String query = "SELECT MONTH(dateIssued) AS month, SUM(amount) AS totalPaid FROM Payment GROUP BY MONTH(dateIssued);";
@@ -465,7 +466,7 @@ public class Reports {
     /**
      * Calculate the total payments per authorship or editions
      * 
-     * @return
+     * @return the total amount of money paid per work type
      */
     public static boolean totalPaymentsPerWorkType() {
         String query = "SELECT workType, SUM(amount) AS totalPaid FROM Payment GROUP BY workType;";
