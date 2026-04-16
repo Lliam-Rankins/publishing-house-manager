@@ -29,20 +29,19 @@ public class People {
         return true;
     }
 
-    public static boolean enterPayment(int paymentId, float amount, String dateIssued,
-            String workType, String dateClaimed, int personId) {
+    public static boolean enterPayment(int paymentId, float amount, java.sql.Date dateIssued,
+            String workType, java.sql.Date dateClaimed, int personId) {
         DBManager.beginTransaction();
 
-        String query1 = "INSERT INTO Payment VALUES (%d, %f, '%s', '%s', %s)";
+        String query1 = "INSERT INTO Payment VALUES (%d, %f, %s, '%s', %s)";
         String query2 = "INSERT INTO Receives VALUES (%d, %d)";
 
         // Handle null values for parameters
-        if (dateClaimed == null) {
-            dateClaimed = "NULL";
-        } else {
-            dateClaimed = "'" + dateClaimed + "'";
-        }
-        query1 = String.format(query1, paymentId, amount, dateIssued, workType, dateClaimed);
+
+        String dateClaimedValue = (dateClaimed == null) ? "NULL"
+                : "'" + dateClaimed.toString() + "'";
+        String dateIssuedValue = "'" + dateIssued.toString() + "'";
+        query1 = String.format(query1, paymentId, amount, dateIssuedValue, workType, dateClaimedValue);
         query2 = String.format(query2, personId, paymentId);
 
         if (!DBManager.executeUpdate(query1)) { // If we fail to add the payment to the Payments
@@ -77,8 +76,7 @@ public class People {
     }
 
     public static boolean listUnclaimedPayments(String startDate, String endDate) {
-        String query =
-                "SELECT * FROM Payment WHERE dateClaimed IS NULL AND dateIssued BETWEEN '%s' AND '%s'";
+        String query = "SELECT * FROM Payment WHERE dateClaimed IS NULL AND dateIssued BETWEEN '%s' AND '%s'";
         query = String.format(query, startDate, endDate);
 
         ResultSet rs = DBManager.executeQuery(query);
@@ -93,6 +91,26 @@ public class People {
                 System.out.println("paymentId: " + paymentId + " | amount: " + amount
                         + " | dateIssued: " + dateIssued + " | workType: " + workType
                         + " | dateClaimed: " + dateClaimed);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public static boolean viewPublicationsByEditor(int pID) {
+        String query = "SELECT * FROM Publication WHERE pubID IN(SELECT pubID from Edits where pID = %d)";
+        query = String.format(query, pID);
+        ResultSet rs = DBManager.executeQuery(query);
+        try {
+            while (rs.next()) {
+                int pubId = rs.getInt("pubID");
+                String type = rs.getString("type");
+                String title = rs.getString("title");
+                String pubPeriodicity = rs.getString("pubPeriodicity");
+                System.out.println("pubID: " + pubId + " | type: " + type
+                        + " | title: " + title + " | pubPeriodicity: " + pubPeriodicity);
             }
         } catch (SQLException e) {
             e.printStackTrace();

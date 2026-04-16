@@ -35,6 +35,9 @@ public class Main {
                     case "listUnclaimedPayments":
                         peopleUI.handleListUnclaimedPayments();
                         break;
+                    case "viewPublicationsByEditor":
+                        peopleUI.handleViewPublicationsByEditor();
+                        break;
 
                     /////////////////////////
                     // Distributor Operations
@@ -268,6 +271,14 @@ public class Main {
                         Reports.totalExpenses();
                         break;
                     }
+                    case "totalPaymentsPerMonth": {
+                        Reports.totalPaymentsPerMonth();
+                        break;
+                    }
+                    case "totalPaymentsPerWorkType": {
+                        Reports.totalPaymentsPerWorkType();
+                        break;
+                    }
 
                     // Help Case
                     case "help": {
@@ -308,6 +319,7 @@ public class Main {
                         System.out.println("enterPayment");
                         System.out.println("claimPayment");
                         System.out.println("listUnclaimedPayments");
+                        System.out.println("viewPublicationsByEditor");
                         System.out.println("");
 
                         // Distributor Operations
