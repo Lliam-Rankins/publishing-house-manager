@@ -382,9 +382,11 @@ public class Distributor {
             rs.close();
 
             String isbnSql = String.format(
-                    "SELECT ROUND(o.copies * e.price + o.shippingCost, 2) AS orderTotal " +
-                            "FROM `Order` o JOIN ContainsISBN ci ON o.oID = ci.oID " +
-                            "JOIN Edition e ON ci.ISBN = e.ISBN WHERE o.oID = %d",
+                    "SELECT COALESCE(ROUND(o.copies * e.price, 2), 0) AS orderTotal " +
+                            "FROM `Order` o " +
+                            "JOIN ContainsISBN ci ON o.oID = ci.oID " +
+                            "JOIN Edition e ON ci.ISBN = e.ISBN " +
+                            "WHERE o.oID = %d",
                     oID);
             ResultSet rsIsbn = DBManager.executeQuery(isbnSql);
             if (rsIsbn.next() && rsIsbn.getObject("orderTotal") != null) {
@@ -395,13 +397,14 @@ public class Distributor {
             if (orderTotal == 0.0f) {
                 // using COALESCE TO PROTECT OPERATIONS FROM NULL
                 String issueSql = String.format(
-                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + COALESCE(o.shippingCost, 0) AS orderTotal " +
+                        "SELECT COALESCE(SUM(o.copies * i.price), 0) AS orderTotal " +
                                 "FROM `Order` o " +
                                 "JOIN ContainsIssue ci ON o.oID = ci.oID " +
                                 "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
                                 "WHERE o.oID = %d " +
-                                "GROUP BY o.oID, o.shippingCost",
+                                "GROUP BY o.oID",
                         oID);
+
                 ResultSet rsIssue = DBManager.executeQuery(issueSql);
                 if (rsIssue.next() && rsIssue.getObject("orderTotal") != null) {
                     orderTotal = rsIssue.getFloat("orderTotal");
@@ -435,14 +438,14 @@ public class Distributor {
 
     /**
      * This function returns the total of an order by adding the shipping cost}
-     * and the product of the number of copies and the price of individual copies
+     * and the the price of individual copies
      * 
      * @param orderID
      * @return the total of an order
      */
     public static float getOrderTotal(int orderID) {
         // Try issues first
-        String query = "SELECT (o.copies * i.price + o.shippingCost) AS orderTotal " +
+        String query = "SELECT (o.copies * i.price) AS orderTotal " +
                 "FROM `Order` o " +
                 "JOIN ContainsIssue ci ON o.oID = ci.oID " +
                 "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
@@ -459,7 +462,7 @@ public class Distributor {
         }
 
         // Try editions
-        query = "SELECT (o.copies * e.price + o.shippingCost) AS orderTotal " +
+        query = "SELECT (o.copies * e.price ) AS orderTotal " +
                 "FROM `Order` o " +
                 "JOIN ContainsISBN cisbn ON o.oID = cisbn.oID " +
                 "JOIN Edition e ON cisbn.ISBN = e.ISBN " +
@@ -547,7 +550,7 @@ public class Distributor {
                 "SELECT CombinedResults.distribID, SUM(SubBalance) AS CalculatedBalance " +
                 "FROM ( " +
                 "SELECT Distributor.distribID, " +
-                "SUM(`Order`.shippingCost + (`Order`.copies * Issue.price)) AS SubBalance " +
+                "SUM((`Order`.copies * Issue.price)) AS SubBalance " +
                 "FROM Distributor " +
                 "NATURAL JOIN PlacedBy " +
                 "NATURAL JOIN `Order` " +
@@ -557,7 +560,7 @@ public class Distributor {
                 "GROUP BY Distributor.distribID " +
                 "UNION ALL " +
                 "SELECT Distributor.distribID, " +
-                "SUM(`Order`.shippingCost + (`Order`.copies * Edition.price)) AS SubBalance " +
+                "SUM((`Order`.copies * Edition.price)) AS SubBalance " +
                 "FROM Distributor " +
                 "NATURAL JOIN PlacedBy " +
                 "NATURAL JOIN `Order` " +
