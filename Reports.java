@@ -433,4 +433,60 @@ public class Reports {
             return false;
         }
     }
+
+    /**
+     * Calculate the total payments maded in a month
+     * 
+     * @return
+     */
+    public static boolean totalPaymentsPerMonth() {
+        String query = "SELECT MONTH(dateIssued) AS month, SUM(amount) AS totalPaid FROM Payment GROUP BY MONTH(dateIssued);";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't calculate total payments per month");
+            return false;
+        }
+
+        try {
+            System.out.println("Total payments per month:");
+            while (table.next()) {
+                System.out
+                        .println("Month: " + table.getInt("month") + " | Total Paid: $" + table.getFloat("totalPaid"));
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("Couldn't calculate total payments per month");
+            return false;
+        }
+    }
+
+    /**
+     * Calculate the total payments per authorship or editions
+     * 
+     * @return
+     */
+    public static boolean totalPaymentsPerWorkType() {
+        String query = "SELECT workType, SUM(amount) AS totalPaid FROM Payment GROUP BY workType;";
+
+        ResultSet table = DBManager.executeQuery(query);
+
+        if (table == null) {
+            System.out.println("Couldn't calculate total payments per work type");
+            return false;
+        }
+
+        try {
+            System.out.println("Total payments per work type:");
+            while (table.next()) {
+                System.out.println(
+                        "Work Type: " + table.getString("workType") + " | Total Paid: $" + table.getFloat("totalPaid"));
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("Couldn't calculate total payments per work type");
+            return false;
+        }
+    }
 }
