@@ -30,13 +30,13 @@ public class DistributorUI {
         try {
             boolean success = distributor.addDistributor(distribID, balance, contactName, phoneNumber, category, name,
                     street, city, state);
-            if (success){
+            System.out.print("SUCCESS STATUS" + success);
+            if (success) {
                 System.out.println(GREEN + "Distributor added successfully." + RESET);
-            }
-            else{
+            } else {
                 System.out.println(RED + "Not Possible, try." + RESET);
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -126,7 +126,8 @@ public class DistributorUI {
                 System.out.println("Copies: ");
                 int copies = Integer.parseInt(s.nextLine());
                 try {
-                    boolean success = distributor.inputOrderIssue(distribID, oID, pubID, issueTitle, dueBy, shippingCost,
+                    boolean success = distributor.inputOrderIssue(distribID, oID, pubID, issueTitle, dueBy,
+                            shippingCost,
                             datePlaced, deliveryStatus, paymentStatus, copies);
                     if (success) {
                         System.out.println(GREEN + "Order added successfully." + RESET);
@@ -151,16 +152,15 @@ public class DistributorUI {
         int oID = Integer.parseInt(s.nextLine());
         try {
             boolean success = distributor.billDistributor(oID, distribID);
-            if (success){
-                System.out.println(GREEN +"Distributor billed successfully!"+RESET);
-            }
-            else{
+            if (success) {
+                System.out.println(GREEN + "Distributor billed successfully!" + RESET);
+            } else {
                 System.out.println("Billed failed. Please check the order ID.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
     }
 
     public static void handleReceivePayment(Scanner s, Distributor distributor) {
@@ -176,19 +176,17 @@ public class DistributorUI {
 
         System.out.print("Enter the ID of the order you want to pay: ");
         int oID = Integer.parseInt(s.nextLine());
-        try{
+        try {
             boolean success = distributor.receivePayment(oID, distribID);
             if (success) {
                 System.out.println("Payment received successfully!");
             } else {
                 System.out.println("Payment failed. Please check the order ID.");
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        
 
-        
     }
 
     public static void handleIdentifyMismatchedDistributors(Scanner s, Distributor distributor) {
