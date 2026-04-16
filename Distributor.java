@@ -74,6 +74,8 @@ public class Distributor {
     public void updateDistributor(String field, String value, int distribID) throws SQLException {
         DBManager.beginTransaction();
         String sql = "UPDATE Distributor SET " + field + " = ? WHERE distribID = ?";
+        // use prepared statment here because the field is unkwon and we cannot know if
+        // it accept NULL or not
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setString(1, value);
         pstmt.setInt(2, distribID);
@@ -99,6 +101,7 @@ public class Distributor {
     public void deleteDistributor(int distribID) throws SQLException {
         DBManager.beginTransaction();
         String sql = "DELETE FROM Distributor WHERE distribID = ?; ";
+        // Use prepared statment to be aware of not existing data
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, distribID);
         int rows = pstmt.executeUpdate();
@@ -132,7 +135,7 @@ public class Distributor {
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
-
+        // control that values are logical
         if (copies <= 0 || (shippingCost != null && shippingCost < 0)) {
             System.out.println(RED + "Not valid values for copies or shipping cost" + RESET);
             return false;
@@ -153,7 +156,7 @@ public class Distributor {
             DBManager.rollbackTransaction();
             return false;
         }
-        // Which publication (issue) is related to this orders
+        // Which publication (edition) is related to this orders
         String sql2 = String.format(
                 "INSERT INTO ContainsISBN VALUES(%d, %d)",
                 oID, ISBN);
@@ -203,7 +206,7 @@ public class Distributor {
             String datePlaced, String deliveryStatus,
             String paymentStatus, int copies) throws SQLException {
         DBManager.beginTransaction();
-
+        // control for logic values
         if (copies <= 0 || (shippingCost != null && shippingCost < 0)) {
             System.out.println(RED + "Not valid values for copies or shipping cost" + RESET);
             return false;
@@ -278,8 +281,8 @@ public class Distributor {
     /**
      * This function checks if a certain order was placed by a ceratin author
      * 
-     * @param oID
-     * @param distribID
+     * @param oID       unique identificator of an order
+     * @param distribID unique identificator of a distributor
      * @return true if there exist a relation between the order and distributor
      * @throws SQLException
      */
@@ -288,7 +291,8 @@ public class Distributor {
         String sql = "SELECT o.paymentStatus FROM `Order` o " +
                 "JOIN PlacedBy p ON o.oID = p.oID " +
                 "WHERE o.oID = ? AND p.distribID = ?";
-
+        // PreparedStatement is used to improve clarity and structure of parameter
+        // handling
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, oID);
         pstmt.setInt(2, distribID);
@@ -320,7 +324,7 @@ public class Distributor {
      * Receive a payment and change the outstanding balance of a distributor.
      * 
      * @param distribID unique identifier of a distributor
-     * @return
+     * @return true if paid, false otherwise
      * @throws SQLException
      */
     public boolean receivePayment(int oID, int distribID) throws SQLException {
@@ -391,10 +395,7 @@ public class Distributor {
             if (orderTotal == 0.0f) {
                 // using COALESCE TO PROTECT OPERATIONS FROM NULL
                 String issueSql = String.format(
-                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + COALESCE(o.shippingCost, 0) AS orderTotal " + // <--
-                                                                                                                     // ¡Espacio
-                                                                                                                     // agregado
-                                                                                                                     // aquí!
+                        "SELECT COALESCE(SUM(o.copies * i.price), 0) + COALESCE(o.shippingCost, 0) AS orderTotal " +
                                 "FROM `Order` o " +
                                 "JOIN ContainsIssue ci ON o.oID = ci.oID " +
                                 "JOIN Issue i ON ci.pubID = i.pubID AND ci.issueTitle = i.issueTitle " +
@@ -413,7 +414,7 @@ public class Distributor {
             DBManager.rollbackTransaction();
             return false;
         }
-
+        // calculating the new balance
         float newBalance = balance - orderTotal;
 
         String sql3 = String.format(java.util.Locale.US,
@@ -437,7 +438,7 @@ public class Distributor {
      * and the product of the number of copies and the price of individual copies
      * 
      * @param orderID
-     * @return
+     * @return the total of an order
      */
     public static float getOrderTotal(int orderID) {
         // Try issues first
