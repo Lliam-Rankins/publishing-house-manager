@@ -54,6 +54,7 @@ public class DistributorUI {
             }
 
         } catch (SQLException e) {
+            System.out.println(RED + "ERROR" + RESET);
             e.printStackTrace();
 
         }
