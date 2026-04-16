@@ -40,6 +40,7 @@ public class DistributorUI {
         System.out.println("DEBUG: Read city: '" + city + "'");
         System.out.println("Enter state: ");
         String state = s.nextLine();
+        System.out.println("DEBUG: Read state: '" + state + "'");
 
         try {
             System.out.print("Trying to execute query");
