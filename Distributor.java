@@ -11,6 +11,10 @@ public class Distributor {
     public static final String RESET = "\033[0m";
     private Connection connection;
 
+    public Distributor() {
+        // nothing
+    }
+
     public Distributor(Connection connection) {
         this.connection = connection;
 
