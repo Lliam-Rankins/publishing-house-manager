@@ -1,3 +1,5 @@
+package src;
+
 import java.util.Scanner;
 
 public class Main {
@@ -18,9 +20,9 @@ public class Main {
                 System.out.println("Enter an operation, or 'exit' to exit: ");
                 String operation = s.nextLine();
                 switch (operation) {
-                    ///////////////
+                    //////////////
                     // People Operations
-                    ///////////////
+                    //////////////
                     case "assignEditorToPublication":
                         peopleUI.handleAssignEditorToPublication();
                         break;
@@ -40,9 +42,9 @@ public class Main {
                         peopleUI.handleViewPublicationsByEditor();
                         break;
 
-                    ////////////////////
+                    ///////////////////
                     // Distributor Operations
-                    ////////////////////
+                    ///////////////////
                     case "addDistributor": {
                         DistributorUI.handleAddDistributor(s, distributor);
                         break;
@@ -86,9 +88,9 @@ public class Main {
                         break;
                     }
 
-                    //////////////////
+                    /////////////////
                     // Publication Operations
-                    ///////////////////
+                    //////////////////
                     case "addPublication": {
                         PublicationUI.handleAddPublication(s);
                         break;
@@ -199,9 +201,9 @@ public class Main {
                         break;
                     }
 
-                    ////////////////
+                    ///////////////
                     // Report Operations
-                    ////////////////
+                    ///////////////
                     // Count total number of distributors
                     case "countDistributors": {
                         Reports.countDistributors();

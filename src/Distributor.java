@@ -1,3 +1,4 @@
+package src;
 
 /**
  * The Distributor class handles operations related to distributors
