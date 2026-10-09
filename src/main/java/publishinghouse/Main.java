@@ -372,6 +372,7 @@ public class Main {
             s.close();
             DBManager.close();
         } catch (Exception e) {
+            e.printStackTrace();
             DBManager.close();
         }
     }

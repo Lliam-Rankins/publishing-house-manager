@@ -5,6 +5,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AppTest {
     @Test
+    void testInitializeDatabase() {
+        assertDoesNotThrow(() -> DBManager.initialize(true));
+        assertNotNull(DBManager.connection);
+    }
+
+    @Test
     void testSanity() {
         assertEquals(2, 1 + 1);
     }

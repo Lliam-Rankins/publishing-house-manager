@@ -5,9 +5,16 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.lang.Integer;
 
 public class DBManager {
-    private static final String jdbcURL = "URL";
+    public static String DB_HOST;
+    public static int DB_PORT;
+    public static String DB_NAME;
+    public static String DB_USER;
+    public static String DB_PASSWORD;
+
+    private static String jdbcURL = "URL";
 
     public static Connection connection = null;
     public static Statement statement = null;
@@ -32,12 +39,19 @@ public class DBManager {
     }
 
     public static void connectToDatabase() throws SQLException, ClassNotFoundException {
+        // Collect DB Env variables for contructing URL
+        DB_HOST = System.getenv("DB_HOST") != null ? System.getenv("DB_HOST") : "localhost";
+        DB_PORT = System.getenv("DB_PORT") != null ? Integer.parseInt(System.getenv("DB_PORT")) : 3306;
+        DB_NAME = System.getenv("DB_NAME") != null ? System.getenv("DB_NAME") : "publishing_house_database";
+        DB_USER = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "testuser";
+        DB_PASSWORD = System.getenv("DB_PASSWORD") != null ? System.getenv("DB_PASSWORD") : "testpassword";
+
+        // jdbc:mariadb://classdb2.csc.ncsu.edu:3306/ambiscoe
+        jdbcURL = "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
+
         Class.forName("org.mariadb.jdbc.Driver");
 
-        String user = "USER";
-        String password = "PASS";
-
-        connection = DriverManager.getConnection(jdbcURL, user, password);
+        connection = DriverManager.getConnection(jdbcURL, DB_USER, DB_PASSWORD);
         statement = connection.createStatement();
     }
 
@@ -65,7 +79,7 @@ public class DBManager {
         try {
             statement.executeUpdate(sql);
         } catch (SQLException e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return false;
         }
         return true;

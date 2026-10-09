@@ -1,0 +1,12 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: publishing_house_database
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-testrootpassword}
+      MARIADB_DATABASE: ${DB_NAME:-publishing_house_database}
+      MARIADB_USER: ${DB_USER:-testuser}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-testpassword}
+    ports:
+      - "3306:3306"
