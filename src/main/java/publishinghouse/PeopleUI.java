@@ -1,4 +1,4 @@
-package src;
+package publishinghouse;
 
 import java.util.Scanner;
 

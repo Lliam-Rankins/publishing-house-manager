@@ -1,4 +1,4 @@
-package src;
+package publishinghouse;
 
 /**
  * The Distributor class handles operations related to distributors

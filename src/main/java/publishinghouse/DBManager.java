@@ -1,4 +1,4 @@
-package src;
+package publishinghouse;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DBManager {
-    private static final String jdbcURL = "jdbc:mariadb://classdb2.csc.ncsu.edu:3306/ambiscoe";
+    private static final String jdbcURL = "URL";
 
     public static Connection connection = null;
     public static Statement statement = null;
@@ -34,8 +34,8 @@ public class DBManager {
     public static void connectToDatabase() throws SQLException, ClassNotFoundException {
         Class.forName("org.mariadb.jdbc.Driver");
 
-        String user = "ambiscoe";
-        String password = "Summer00";
+        String user = "USER";
+        String password = "PASS";
 
         connection = DriverManager.getConnection(jdbcURL, user, password);
         statement = connection.createStatement();
