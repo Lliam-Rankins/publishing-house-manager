@@ -20,5 +20,8 @@ services:
       DB_NAME: ${DB_NAME:-publishing_house_database}
       DB_USER: ${DB_USER:-testuser}
       DB_PASSWORD: ${DB_PASSWORD:-testpassword}
+      PORT: 8080
+    ports:
+      - "8080:8080"
     depends_on:
       - db
