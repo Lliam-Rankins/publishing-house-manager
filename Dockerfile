@@ -5,5 +5,6 @@ COPY pom.xml .
 COPY src ./src
 
 ENV TEST="false"
+ENV LINT="false"
 EXPOSE 8080
-CMD if [ "$TEST" = "true" ]; then mvn test; else mvn compile exec:java -Dexec.mainClass="publishinghouse.Main"; fi
+CMD if [ "$LINT" = "true" ]; then mvn compile; elif [ "$TEST" = "true" ]; then mvn test; else mvn compile exec:java -Dexec.mainClass="publishinghouse.Main"; fi  

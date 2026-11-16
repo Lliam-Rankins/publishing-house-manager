@@ -2,15 +2,19 @@ name: Test-Box
 
 on:
   push:
-    branches: [master]
+    branches: [main, master, dev]
   pull_request:
-    branches: [master]
+    branches: [main, master, dev]
     types: ["opened", "reopened", "synchronize"]
   # Temp for testing functionality
   workflow_dispatch:
 
 jobs:
   Call-Test-Box:
+    permissions:
+      contents: read
+      packages: write
     uses: Lliam-Rankins/test-box/.github/workflows/central-test.yml@master
     with:
+      enable_lint: true
       test_service: "app"

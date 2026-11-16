@@ -3,11 +3,13 @@ package publishinghouse;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 
 public class Main {
 
     public static void main(String[] args) {
+
         try {
             boolean reset = (args.length > 0 && "reset".equalsIgnoreCase(args[0]))
                     || "true".equalsIgnoreCase(System.getenv("RESET_DB"));
