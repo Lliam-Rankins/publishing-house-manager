@@ -12,7 +12,7 @@ on:
 jobs:
   Call-Test-Box:
     permissions:
-      content: read
+      contents: read
       packages: write
     uses: Lliam-Rankins/test-box/.github/workflows/central-test.yml@master
     with:
