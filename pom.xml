@@ -36,6 +36,7 @@
                     <source>21</source>
                     <target>21</target>
                     <showWarnings>true</showWarnings>
+                    <failOnWarning>true</failOnWarning>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                     </compilerArgs>
