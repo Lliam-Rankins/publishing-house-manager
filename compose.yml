@@ -23,6 +23,7 @@ services:
     container_name: publishing_house_frontend
     environment:
       TEST: ${TEST:-false}
+      LINT: ${LINT:-false}
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-publishing_house_database}

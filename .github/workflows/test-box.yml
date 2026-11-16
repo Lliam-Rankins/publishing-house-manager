@@ -16,4 +16,5 @@ jobs:
       packages: write
     uses: Lliam-Rankins/test-box/.github/workflows/central-test.yml@master
     with:
+      enable_lint: true
       test_service: "app"
