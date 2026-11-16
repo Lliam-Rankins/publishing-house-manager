@@ -3,6 +3,11 @@ services:
     image: mariadb:11
     container_name: publishing_house_database
     restart: always
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-testrootpassword}
       MARIADB_DATABASE: ${DB_NAME:-publishing_house_database}
@@ -11,6 +16,9 @@ services:
     ports:
       - "3306:3306"
   app:
+    depends_on:
+      db:
+        condition: service_healthy
     build: .
     container_name: publishing_house_frontend
     environment:
@@ -23,5 +31,3 @@ services:
       PORT: 8080
     ports:
       - "8080:8080"
-    depends_on:
-      - db
