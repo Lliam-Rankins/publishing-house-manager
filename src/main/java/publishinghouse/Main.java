@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 public class Main {
 
     public static void main(String[] args) {
-        List items = new ArrayList();
 
         try {
             boolean reset = (args.length > 0 && "reset".equalsIgnoreCase(args[0]))
